@@ -1,0 +1,92 @@
+package me.kegantu.boombox.init;
+
+import me.kegantu.boombox.BoomBox;
+import me.kegantu.boombox.entity.BoomBoxEntity;
+import me.kegantu.boombox.soundsystem.MusicManager;
+import me.kegantu.boombox.soundsystem.Sound;
+import me.kegantu.boombox.utils.AudioDownloader;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
+
+import java.nio.file.Path;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
+public class ModPackets {
+
+    public static final Identifier BOOMBOX_PLAY_S2C = new Identifier(BoomBox.MOD_ID, "boombox_play_client");
+    public static final Identifier BOOMBOX_STOP_S2C = new Identifier(BoomBox.MOD_ID, "boombox_stop_client");
+    public static final Identifier BOOMBOX_PLAY_C2S = new Identifier(BoomBox.MOD_ID, "boombox_play_server");
+    public static final Identifier BOOMBOX_STOP_C2S = new Identifier(BoomBox.MOD_ID, "boombox_stop_server");
+
+    public static void registerC2SPackets(){
+        ServerPlayNetworking.registerGlobalReceiver(BOOMBOX_PLAY_C2S,
+                (server, player, handler, buf, responseSender) ->{
+                    PacketByteBuf bufClient = PacketByteBufs.create();
+                    bufClient.writeString(buf.readString());
+                    bufClient.writeFloat(buf.readFloat());
+                    bufClient.writeVector3f(buf.readVector3f());
+                    String uuid = buf.readString();
+                    int entityId = buf.readInt();
+                    BoomBoxEntity entity = (BoomBoxEntity) player.getWorld().getEntityById(entityId);
+                    entity.setMusicUUID(UUID.fromString(uuid));
+                    bufClient.writeString(uuid);
+                    bufClient.writeInt(entityId);
+                    BoomBox.LOGGER.info(uuid + " server play");
+
+                    for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()){
+                        if (playerEntity == player){
+                            continue;
+                        }
+                        ServerPlayNetworking.send(playerEntity, BOOMBOX_PLAY_S2C, bufClient);
+                    }
+                });
+
+        ServerPlayNetworking.registerGlobalReceiver(BOOMBOX_STOP_C2S,
+                (server, player, handler, buf, responseSender) -> {
+                    PacketByteBuf bufClient = PacketByteBufs.create();
+                    String uuid = buf.readString();
+                    bufClient.writeString(uuid);
+                    BoomBox.LOGGER.info(uuid + " server stop");
+
+                    for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()){
+                        if (playerEntity == player){
+                            continue;
+                        }
+                        ServerPlayNetworking.send(playerEntity, BOOMBOX_STOP_S2C, bufClient);
+                    }
+        });
+    }
+
+    public static void registerS2CPackets(){
+        ClientPlayNetworking.registerGlobalReceiver(BOOMBOX_PLAY_S2C, (client, handler, buf, responseSender) -> {
+            String youtubeLink = buf.readString();
+            float volume = buf.readFloat();
+            Vec3d position = new Vec3d(buf.readVector3f());
+            String uuid = buf.readString();
+            BoomBox.LOGGER.info(uuid + " client play");
+
+            CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink));
+            futureFfmpeg.thenAccept(path -> playMusic(path, volume, position, UUID.fromString(uuid)));
+
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(BOOMBOX_STOP_S2C, (client, handler, buf, responseSender) -> {
+            String musicUUID = buf.readString();
+            BoomBox.LOGGER.info(musicUUID + " client stop");
+
+            MusicManager.getSound(musicUUID).stop();
+            MusicManager.remove(musicUUID);
+        });
+    }
+
+    private static void playMusic(Path output, float volume, Vec3d position, UUID uuid){
+        Sound music = new Sound(output, position, volume, uuid);
+        music.play();
+    }
+}
