@@ -20,7 +20,7 @@ public class BoomboxScreen extends Screen {
     private TextFieldWidget musicLink;
     private SimpleOption<Double> boomboxVolume;
 
-    private String youtubeLink;
+    private String youtubeLink = "";
     private double volume = 1d;
     private BoomBoxEntity entity;
 
@@ -30,24 +30,35 @@ public class BoomboxScreen extends Screen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    protected void init() {
         confirm = ButtonWidget.builder(Text.literal("Confirm"), button -> {
+            if (youtubeLink.isEmpty()){
+                this.client.player.sendMessage(Text.literal("Please put your youtube link"), true);
+                this.client.setScreen(null);
+                return;
+            }
+
             entity.downloadMusic(youtubeLink, volume);
-            this.client.player.sendMessage(Text.literal("Downloading audio..."), true);
+            this.client.player.sendMessage(Text.literal("Downloading an audio..."), true);
             this.client.setScreen(null);
-        }).dimensions(this.width / 2 - 75, 240, 300, 20).build();
-        musicLink = new TextFieldWidget(this.textRenderer, this.width / 2 - 75, 160, 300, 20, Text.literal("diddy"));
+        }).dimensions((this.width - 300) / 2, 240, 300, 20).build();
+        musicLink = new TextFieldWidget(this.textRenderer, (this.width - 300) / 2, 160, 300, 20, Text.literal("link"));
+        musicLink.setMaxLength(128);
         musicLink.setChangedListener(s -> {
             youtubeLink = s;
         });
         boomboxVolume = new SimpleOption<Double>("options.boombox.volume", SimpleOption.emptyTooltip(),
-                (optionText, value) -> value == 0.0 ? this.client.options.getGenericValueText(optionText, ScreenTexts.OFF) : getPercentValueText(optionText, value),
+                (optionText, value) -> value == 0.0 ? this.client.options.getGenericValueText(optionText, ScreenTexts.OFF) : this.getPercentValueText(optionText, value),
                 SimpleOption.DoubleSliderCallbacks.INSTANCE, 1d, aFloat -> volume = aFloat);
-
 
         addDrawableChild(confirm);
         addDrawableChild(musicLink);
-        addDrawableChild(boomboxVolume.createWidget(this.client.options, this.width / 2 - 75, 80, 300));
+        addDrawableChild(boomboxVolume.createWidget(this.client.options, (this.width - 300) / 2, 80, 300));
+    }
+
+    @Override
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        this.renderBackground(context);
         super.render(context, mouseX, mouseY, delta);
     }
 
@@ -58,7 +69,7 @@ public class BoomboxScreen extends Screen {
         return super.keyPressed(i, j, k);
     }
 
-    private static Text getPercentValueText(Text prefix, double value) {
+    private Text getPercentValueText(Text prefix, double value) {
         return Text.translatable("options.percent_value", prefix, (int)(value * 100.0));
     }
 }
