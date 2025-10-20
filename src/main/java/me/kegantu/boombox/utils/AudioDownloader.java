@@ -8,6 +8,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.world.World;
 import net.minecraft.world.level.storage.LevelStorage;
+import org.apache.commons.lang3.SystemUtils;
 /*import org.bytedeco.ffmpeg.avcodec.AVCodec;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
@@ -45,7 +46,7 @@ public class AudioDownloader {
 
             youtubeVideo.streams().filter(StreamQuery.Filter.builder().type("audio").build()).getFirst().download(saveDirectory + "\\", "musicD");
 
-            String[] command = {"C:\\ffmpeg\\bin\\ffmpeg", "-y", "-i", saveDirectory + "\\musicD.mp4", saveDirectory + "\\output.ogg"};
+            String[] command = {FFmpegDownloader.FFMPEG_LOCATION, "-y", "-i", saveDirectory + "\\musicD.mp4", "-ac 1", saveDirectory + "\\output.ogg"};
             ProcessBuilder ffmpegBuilder = new ProcessBuilder(command);
             ffmpegBuilder.redirectErrorStream(true);
             Process ffmpeg = ffmpegBuilder.start();

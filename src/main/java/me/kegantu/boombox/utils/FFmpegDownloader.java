@@ -1,6 +1,7 @@
 package me.kegantu.boombox.utils;
 
 import net.fabricmc.loader.api.FabricLoader;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.*;
 import java.net.URI;
@@ -11,12 +12,38 @@ import java.nio.file.*;
 
 public class FFmpegDownloader {
 
-    public static final Path FFMPEG_LOCATION = Path.of(FabricLoader.getInstance().getGameDir() + "\\music\\ffmpeg\\ffmpeg.exe");
+    private static String FFMPEG_FILE = "ffmpeg";
+    private static String REPOSITORY_FILE = "";
     private static final String REPOSITORY = "https://github.com/Tyrrrz/FFmpegBin/releases/download/7.1.1/";
-    private static final Path OUTPUT_ZIP = Path.of(FabricLoader.getInstance().getGameDir() + "\\music\\ffmpeg\\ffmpeg-windows-x64.zip");
+    private static File OUTPUT_ZIP;
+    public static String FFMPEG_LOCATION = "";
+
+    private static void prepare(){
+        if (SystemUtils.IS_OS_WINDOWS){
+            FFMPEG_FILE += ".exe";
+            REPOSITORY_FILE = "ffmpeg-windows-x64.zip";
+        } else if (SystemUtils.IS_OS_LINUX) {
+            REPOSITORY_FILE = "ffmpeg-linux-x64.zip";
+        } else if (SystemUtils.IS_OS_MAC) {
+            REPOSITORY_FILE = "ffmpeg-osx-x64.zip";
+        }
+
+        FFMPEG_LOCATION = FabricLoader.getInstance().getGameDir() + "\\music\\ffmpeg\\" + FFMPEG_FILE;
+        OUTPUT_ZIP = new File(FabricLoader.getInstance().getGameDir() + "\\music\\ffmpeg\\" + REPOSITORY_FILE);
+
+        if (!OUTPUT_ZIP.exists()){
+            try {
+                Files.createDirectory(Path.of(FabricLoader.getInstance().getGameDir() + "\\music\\ffmpeg"));
+            } catch (Exception ignored) {
+
+            }
+        }
+    }
 
     public static void download(){
-        if (Files.exists(FFMPEG_LOCATION, LinkOption.NOFOLLOW_LINKS)){
+        prepare();
+
+        if (Files.exists(Path.of(FFMPEG_LOCATION), LinkOption.NOFOLLOW_LINKS)){
             return;
         }
 
@@ -26,7 +53,7 @@ public class FFmpegDownloader {
                     .build();
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(REPOSITORY + "ffmpeg-windows-x64.zip"))
+                    .uri(URI.create(REPOSITORY + REPOSITORY_FILE))
                     .header("Accept", "application/octet-stream")
                     .GET()
                     .build();
@@ -35,27 +62,22 @@ public class FFmpegDownloader {
                     HttpResponse.BodyHandlers.ofByteArray());
 
             if (response.statusCode() == 200) {
-                try (FileOutputStream fos = new FileOutputStream(OUTPUT_ZIP.toString())) {
+                try (FileOutputStream fos = new FileOutputStream(OUTPUT_ZIP.toPath().toString())) {
                     fos.write(response.body());
                 }
             } else {
                 throw new IOException("Failed to download: HTTP " + response.statusCode());
             }
 
-            try (FileSystem fileSystem = FileSystems.newFileSystem(OUTPUT_ZIP)) {
-                Path fileToExtract = fileSystem.getPath("ffmpeg.exe");
-                Files.copy(fileToExtract, FFMPEG_LOCATION);
+            try (FileSystem fileSystem = FileSystems.newFileSystem(OUTPUT_ZIP.toPath())) {
+                Path fileToExtract = fileSystem.getPath(FFMPEG_FILE);
+                Files.copy(fileToExtract, Path.of(FFMPEG_LOCATION));
             }
 
-            client.close();
-            Files.delete(OUTPUT_ZIP);
+            //client.close();
+            Files.delete(OUTPUT_ZIP.toPath());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
-
-    /*private static boolean checkIfExist(){
-        return ;
-    }*/
 }
