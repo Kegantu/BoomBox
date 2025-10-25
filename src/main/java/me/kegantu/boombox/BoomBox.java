@@ -4,7 +4,6 @@ import me.kegantu.boombox.init.ModEntities;
 import me.kegantu.boombox.init.ModItems;
 import me.kegantu.boombox.init.ModPackets;
 import me.kegantu.boombox.soundsystem.MusicManager;
-import me.kegantu.boombox.utils.AudioDownloaderExecutor;
 import me.kegantu.boombox.utils.FFmpegDownloader;
 import net.fabricmc.api.ModInitializer;
 

@@ -21,8 +21,6 @@ import java.util.concurrent.TimeUnit;
 
 public class AudioDownloader {
 
-    private static final AudioDownloaderExecutor AUDIO_DOWNLOADER_EXECUTOR = new AudioDownloaderExecutor("Audio Downloader Executor");
-
     public static Path download(String youtubeURL) {
         //Path savePath = world.getServer().getSavePath(WorldSavePath.ROOT);
         //StringBuilder sb = new StringBuilder(savePath.toString());
