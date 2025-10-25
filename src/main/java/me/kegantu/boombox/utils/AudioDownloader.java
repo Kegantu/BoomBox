@@ -9,11 +9,6 @@ import net.minecraft.util.WorldSavePath;
 import net.minecraft.world.World;
 import net.minecraft.world.level.storage.LevelStorage;
 import org.apache.commons.lang3.SystemUtils;
-/*import org.bytedeco.ffmpeg.avcodec.AVCodec;
-import org.bytedeco.ffmpeg.global.avcodec;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
-import org.bytedeco.javacv.FFmpegFrameRecorder;
-import org.bytedeco.javacv.Frame;*/
 
 import java.io.BufferedReader;
 import java.io.File;

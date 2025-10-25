@@ -14,7 +14,7 @@ public class FFmpegDownloader {
 
     private static String FFMPEG_FILE = "ffmpeg";
     private static String REPOSITORY_FILE = "";
-    private static final String REPOSITORY = "https://github.com/Tyrrrz/FFmpegBin/releases/download/7.1.1/";
+    private static final String REPOSITORY = "https://github.com/Tyrrrz/FFmpegBin/releases/latest/download/";
     private static File OUTPUT_ZIP;
     public static String FFMPEG_LOCATION = "";
 
