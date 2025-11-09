@@ -38,7 +38,7 @@ public class BoomboxScreen extends Screen {
                 return;
             }
 
-            entity.downloadMusic(youtubeLink, volume);
+            entity.downloadMusic(youtubeLink, volume, client.player.getUuid());
             this.client.player.sendMessage(Text.literal("Downloading an audio..."), true);
             this.client.setScreen(null);
         }).dimensions((this.width - 300) / 2, 240, 300, 20).build();

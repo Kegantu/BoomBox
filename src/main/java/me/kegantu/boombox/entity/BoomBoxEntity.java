@@ -194,7 +194,7 @@ public class BoomBoxEntity extends Entity {
         return true;
     }
 
-    public void downloadMusic(String youtubeLink, double volume){
+    public void downloadMusic(String youtubeLink, double volume, UUID musicOwner){
 
         if (this.dataTracker.get(MUSIC_UUID).isEmpty()){
             BoomBox.LOGGER.info("MUSIC_UUID IS EMPTY");
@@ -218,16 +218,17 @@ public class BoomBoxEntity extends Entity {
         buf.writeVector3f(new Vector3f((float) this.getX(), (float) this.getY(), (float) this.getZ()));
         buf.writeString(UUID.randomUUID().toString());
         buf.writeInt(this.getId());
+        buf.writeUuid(musicOwner);
 
         ClientPlayNetworking.send(ModPackets.BOOMBOX_PLAY_C2S, buf);
-        CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink));
-        futureFfmpeg.thenAccept(path -> this.playMusic(path, (float) volume, this.dataTracker.get(MUSIC_UUID).get()));
+        /*CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink));
+        futureFfmpeg.thenAccept(path -> this.playMusic(path, (float) volume, this.dataTracker.get(MUSIC_UUID).get()));*/
     }
 
-    private void playMusic(Path outputFile, float volume, UUID uuid){
+    /*private void playMusic(Path outputFile, float volume, UUID uuid){
         MUSIC = new Sound(outputFile, this.getPos(), volume, uuid);
         MUSIC.play();
-    }
+    }*/
 
     public void setMusicUUID(UUID uuid){
         this.dataTracker.set(MUSIC_UUID, Optional.of(uuid));

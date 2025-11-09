@@ -10,6 +10,8 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 
@@ -21,6 +23,7 @@ public class ModPackets {
 
     public static final Identifier BOOMBOX_PLAY_S2C = new Identifier(BoomBox.MOD_ID, "boombox_play_client");
     public static final Identifier BOOMBOX_STOP_S2C = new Identifier(BoomBox.MOD_ID, "boombox_stop_client");
+
     public static final Identifier BOOMBOX_PLAY_C2S = new Identifier(BoomBox.MOD_ID, "boombox_play_server");
     public static final Identifier BOOMBOX_STOP_C2S = new Identifier(BoomBox.MOD_ID, "boombox_stop_server");
 
@@ -31,18 +34,16 @@ public class ModPackets {
                     bufClient.writeString(buf.readString());
                     bufClient.writeFloat(buf.readFloat());
                     bufClient.writeVector3f(buf.readVector3f());
-                    String uuid = buf.readString();
+                    String musicUUID = buf.readString();
                     int entityId = buf.readInt();
                     BoomBoxEntity entity = (BoomBoxEntity) player.getWorld().getEntityById(entityId);
-                    entity.setMusicUUID(UUID.fromString(uuid));
-                    bufClient.writeString(uuid);
+                    entity.setMusicUUID(UUID.fromString(musicUUID));
+                    bufClient.writeString(musicUUID);
                     bufClient.writeInt(entityId);
-                    BoomBox.LOGGER.info(uuid + " server play");
+                    bufClient.writeUuid(buf.readUuid());
+                    BoomBox.LOGGER.info(musicUUID + " server play");
 
                     for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()){
-                        if (playerEntity == player){
-                            continue;
-                        }
                         ServerPlayNetworking.send(playerEntity, BOOMBOX_PLAY_S2C, bufClient);
                     }
                 });
@@ -55,9 +56,6 @@ public class ModPackets {
                     BoomBox.LOGGER.info(uuid + " server stop");
 
                     for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()){
-                        if (playerEntity == player){
-                            continue;
-                        }
                         ServerPlayNetworking.send(playerEntity, BOOMBOX_STOP_S2C, bufClient);
                     }
         });
@@ -69,10 +67,18 @@ public class ModPackets {
             float volume = buf.readFloat();
             Vec3d position = new Vec3d(buf.readVector3f());
             String uuid = buf.readString();
+            UUID musicOwner = buf.readUuid();
             BoomBox.LOGGER.info(uuid + " client play");
 
             CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink));
-            futureFfmpeg.thenAccept(path -> playMusic(path, volume, position, UUID.fromString(uuid)));
+            futureFfmpeg.whenComplete((path, exception) -> {
+                if (exception != null && client.player.squaredDistanceTo(new Vec3d(position.toVector3f())) <= 16 * 16 && client.player.getUuid() == musicOwner) {
+                    client.player.sendMessage(Text.literal("Failed To Download an Audio").formatted(Formatting.RED), true);
+                    return;
+                }
+
+                playMusic(path, volume, position, UUID.fromString(uuid));
+            });
 
         });
 
