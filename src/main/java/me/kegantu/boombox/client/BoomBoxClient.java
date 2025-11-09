@@ -5,6 +5,7 @@ import me.kegantu.boombox.client.entity.model.BoomBoxEntityModel;
 import me.kegantu.boombox.client.entity.renderer.BoomBoxEntityRenderer;
 import me.kegantu.boombox.init.ModEntities;
 import me.kegantu.boombox.init.ModPackets;
+import me.kegantu.boombox.init.ModParticles;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -19,5 +20,7 @@ public class BoomBoxClient implements ClientModInitializer {
     public void onInitializeClient() {
         EntityRendererRegistry.register(ModEntities.BOOMBOX_ENTITY, BoomBoxEntityRenderer::new);
         EntityModelLayerRegistry.registerModelLayer(BOOMBOX_ENTITY_MODEL_LAYER, BoomBoxEntityModel::getTexturedModelData);
+
+        ModParticles.registerClient();
     }
 }

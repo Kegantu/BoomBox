@@ -113,6 +113,16 @@ public class Sound {
             return;
         }
 
+        int stereoSamples = pcmShortBuffer.remaining() / 2;
+        short[] mono = new short[stereoSamples];
+
+        for (int i = 0; i < stereoSamples; i++) {
+            short left  = pcmShortBuffer.get();
+            short right = pcmShortBuffer.get();
+            mono[i] = (short)((left + right) / 2);
+        }
+        //pcmMono = mono;
+
         var sampleRate = sampleRateBuffer.get();
         MemoryStack.stackPop();
         MemoryStack.stackPop();
@@ -153,7 +163,7 @@ public class Sound {
 
         soundBufferID = AL10.alGenBuffers();
         BoomBox.LOGGER.info(String.valueOf(AL10.alGetError()));
-        AL10.alBufferData(soundBufferID, AL10.AL_FORMAT_MONO16, pcmShortBuffer, sampleRate);
+        AL10.alBufferData(soundBufferID, AL10.AL_FORMAT_MONO16, mono, sampleRate);
         BoomBox.LOGGER.info(AL10.alGetError() + " bufferData");
 
         soundSourceID = AL10.alGenSources();

@@ -5,6 +5,7 @@ import me.kegantu.boombox.client.screen.BoomboxScreen;
 import me.kegantu.boombox.init.ModEntities;
 import me.kegantu.boombox.init.ModItems;
 import me.kegantu.boombox.init.ModPackets;
+import me.kegantu.boombox.init.ModParticles;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
 import me.kegantu.boombox.utils.AudioDownloader;
@@ -23,6 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -41,6 +43,7 @@ public class BoomBoxEntity extends Entity {
     //private static final TrackedData<ItemStack> STACK = DataTracker.registerData(ItemEntity.class, TrackedDataHandlerRegistry.ITEM_STACK);
     private static final TrackedData<Optional<UUID>> MUSIC_UUID = DataTracker.registerData(BoomBoxEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
     private static Sound MUSIC;
+    private int timePassed;
 
     public BoomBoxEntity(EntityType<?> type, World world) {
         super(type, world);
@@ -72,6 +75,7 @@ public class BoomBoxEntity extends Entity {
     @Override
     public void tick() {
         super.tick();
+        this.timePassed++;
 
         this.prevX = this.getX();
         this.prevY = this.getY();
@@ -117,6 +121,28 @@ public class BoomBoxEntity extends Entity {
             if (d > 0.01) {
                 this.velocityDirty = true;
             }
+        }
+
+        if (this.dataTracker.get(MUSIC_UUID).isEmpty()){
+            return;
+        }
+
+        if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()) == null){
+            this.dataTracker.set(MUSIC_UUID, Optional.empty());
+            return;
+        }
+
+        if (!MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()).isPlaying()){
+            return;
+        }
+
+        if (this.timePassed < 20){
+            return;
+        }
+
+        this.timePassed = 0;
+        if (this.getWorld() instanceof ServerWorld serverWorld){
+            serverWorld.spawnParticles(ModParticles.BOOMBOX_NOTE, this.getX(), this.getY(), this.getZ(), 1, 0f,0f,0f, 0f);
         }
     }
 

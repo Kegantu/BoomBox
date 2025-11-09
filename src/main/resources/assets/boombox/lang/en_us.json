@@ -1,3 +1,4 @@
 {
-  "options.boombox.volume": "Audio Volume"
+  "options.boombox.volume": "Audio Volume",
+  "boombox.currentlyPlaying": "Currently Playing: %s"
 }

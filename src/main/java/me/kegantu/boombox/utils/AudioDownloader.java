@@ -37,9 +37,9 @@ public class AudioDownloader {
         try {
             Youtube youtubeVideo = new Youtube(youtubeURL);
 
-            youtubeVideo.streams().filter(StreamQuery.Filter.builder().type("audio").build()).getFirst().download(saveDirectory + "\\", "musicD");
+            youtubeVideo.streams().filter(StreamQuery.Filter.builder().type("audio").build()).getFirst().download(saveDirectory + "\\", "youtube");
 
-            String[] command = {FFmpegDownloader.FFMPEG_LOCATION, "-y", "-i", saveDirectory + "\\musicD.mp4", "-ac 1", saveDirectory + "\\output.ogg"};
+            String[] command = {FFmpegDownloader.FFMPEG_LOCATION, "-y", "-i", saveDirectory + "\\youtube.mp4", saveDirectory + "\\output.ogg"};
             ProcessBuilder ffmpegBuilder = new ProcessBuilder(command);
             ffmpegBuilder.redirectErrorStream(true);
             Process ffmpeg = ffmpegBuilder.start();

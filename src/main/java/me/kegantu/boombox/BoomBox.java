@@ -3,6 +3,7 @@ package me.kegantu.boombox;
 import me.kegantu.boombox.init.ModEntities;
 import me.kegantu.boombox.init.ModItems;
 import me.kegantu.boombox.init.ModPackets;
+import me.kegantu.boombox.init.ModParticles;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.utils.FFmpegDownloader;
 import net.fabricmc.api.ModInitializer;
@@ -26,6 +27,7 @@ public class BoomBox implements ModInitializer {
 		ModEntities.register();
 		ModPackets.registerC2SPackets();
 		ModPackets.registerS2CPackets();
+		ModParticles.register();
 		FFmpegDownloader.download();
 	}
 }
