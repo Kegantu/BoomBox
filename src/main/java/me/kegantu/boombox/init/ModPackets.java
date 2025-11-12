@@ -1,10 +1,12 @@
 package me.kegantu.boombox.init;
 
 import me.kegantu.boombox.BoomBox;
+import me.kegantu.boombox.client.hud.NotificationToast;
 import me.kegantu.boombox.entity.BoomBoxEntity;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
 import me.kegantu.boombox.utils.AudioDownloader;
+import me.kegantu.boombox.utils.YoutubeUtils;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -78,6 +80,9 @@ public class ModPackets {
                 }
 
                 playMusic(path, volume, position, UUID.fromString(uuid));
+                if (client.player.squaredDistanceTo(new Vec3d(position.toVector3f())) <= 16 * 16){
+                    client.getToastManager().add(new NotificationToast(YoutubeUtils.getTitle(youtubeLink)));
+                }
             });
 
         });
@@ -86,8 +91,10 @@ public class ModPackets {
             String musicUUID = buf.readString();
             BoomBox.LOGGER.info(musicUUID + " client stop");
 
-            MusicManager.getSound(musicUUID).stop();
-            MusicManager.remove(musicUUID);
+            if (MusicManager.getSound(musicUUID) != null){
+                MusicManager.getSound(musicUUID).stop();
+                MusicManager.remove(musicUUID);
+            }
         });
     }
 

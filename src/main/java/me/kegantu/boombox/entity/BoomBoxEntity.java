@@ -128,7 +128,6 @@ public class BoomBoxEntity extends Entity {
         }
 
         if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()) == null){
-            this.dataTracker.set(MUSIC_UUID, Optional.empty());
             return;
         }
 
