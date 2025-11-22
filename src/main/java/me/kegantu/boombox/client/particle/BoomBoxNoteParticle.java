@@ -15,8 +15,8 @@ public class BoomBoxNoteParticle extends SpriteBillboardParticle {
         super(clientWorld, x, y, z, xVelocity, yVelocity, zVelocity);
         this.spriteProvider = sprite;
         this.setSprite(sprite);
-        this.setVelocity(0f, 0.02f, 0f);
-        this.setMaxAge(80);
+        this.setVelocity(0f, 0.1f, 0f);
+        this.setMaxAge(20);
     }
 
     @Override

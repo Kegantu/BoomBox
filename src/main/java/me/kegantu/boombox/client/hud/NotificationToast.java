@@ -13,7 +13,7 @@ import net.minecraft.util.Identifier;
 @Environment(EnvType.CLIENT)
 public class NotificationToast implements Toast {
 
-    private final Identifier NOTIFICATIONS_TEXTURE = new Identifier(BoomBox.MOD_ID, "textures/gui/notifications40.png");
+    private final Identifier NOTIFICATIONS_TEXTURE = new Identifier(BoomBox.MOD_ID, "textures/gui/notifications40v2.png");
     private final String soundtrackName;
 
     public NotificationToast(String soundtrackName) {
@@ -28,10 +28,10 @@ public class NotificationToast implements Toast {
         //stack.push();
         //stack.translate(30f,7f, 0f);
         //stack.scale(0.75f, 0.75f, 0.75f);
-        var fgsdgf = manager.getClient().textRenderer.wrapLines(StringVisitable.plain(soundtrackName), 145);
+        var textLine = manager.getClient().textRenderer.wrapLines(StringVisitable.plain(soundtrackName), 145);
         int y = 7;
-        for (int i = 0; i < fgsdgf.size(); i++) {
-            context.drawText(manager.getClient().textRenderer, fgsdgf.get(i), 30, y, 1947988, false);
+        for (int i = 0; i < textLine.size(); i++) {
+            context.drawText(manager.getClient().textRenderer, textLine.get(i), 34, y, 1947988, false);
             y += 10;
         }
         //stack.pop();
@@ -41,7 +41,7 @@ public class NotificationToast implements Toast {
 
     @Override
     public int getWidth() {
-        return Toast.super.getWidth();
+        return 176;
     }
 
     @Override

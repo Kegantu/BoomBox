@@ -141,7 +141,7 @@ public class BoomBoxEntity extends Entity {
 
         this.timePassed = 0;
         if (this.getWorld() instanceof ServerWorld serverWorld){
-            serverWorld.spawnParticles(ModParticles.BOOMBOX_NOTE, this.getX(), this.getY(), this.getZ(), 1, 0f,0f,0f, 0f);
+            serverWorld.spawnParticles(ModParticles.BOOMBOX_NOTE, this.getX(), this.getY() + 0.25f, this.getZ(), 1, 0f,0f,0f, 0f);
         }
     }
 
