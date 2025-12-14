@@ -123,15 +123,7 @@ public class BoomBoxEntity extends Entity {
             }
         }
 
-        if (this.dataTracker.get(MUSIC_UUID).isEmpty()){
-            return;
-        }
-
-        if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()) == null){
-            return;
-        }
-
-        if (!MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()).isPlaying()){
+        if (!this.isPlaying()){
             return;
         }
 
