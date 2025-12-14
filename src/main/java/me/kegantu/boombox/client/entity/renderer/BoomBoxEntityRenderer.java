@@ -38,6 +38,6 @@ public class BoomBoxEntityRenderer extends EntityRenderer<BoomBoxEntity> {
 
     @Override
     public Identifier getTexture(BoomBoxEntity entity) {
-        return Identifier.of("boombox","textures/entity/boombox_entity.png");
+        return entity.isPlaying() ? Identifier.of("boombox","textures/entity/boombox_entity_on.png") : Identifier.of("boombox","textures/entity/boombox_entity.png");
     }
 }

@@ -232,4 +232,16 @@ public class BoomBoxEntity extends Entity {
     public void setMusicUUID(UUID uuid){
         this.dataTracker.set(MUSIC_UUID, Optional.of(uuid));
     }
+
+    public boolean isPlaying(){
+        if (this.dataTracker.get(MUSIC_UUID).isEmpty()){
+            return false;
+        }
+
+        if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()) == null){
+            return false;
+        }
+
+        return MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()).isPlaying();
+    }
 }
