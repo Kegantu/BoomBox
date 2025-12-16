@@ -40,7 +40,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class BoomBoxEntity extends Entity {
 
-    //private static final TrackedData<ItemStack> STACK = DataTracker.registerData(ItemEntity.class, TrackedDataHandlerRegistry.ITEM_STACK);
     private static final TrackedData<Optional<UUID>> MUSIC_UUID = DataTracker.registerData(BoomBoxEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
     private static Sound MUSIC;
     private int timePassed;
@@ -151,7 +150,7 @@ public class BoomBoxEntity extends Entity {
     public ActionResult interact(PlayerEntity player, Hand hand) {
         if (this.getWorld().isClient()){
             if (player.isSneaking()){
-                MinecraftClient.getInstance().setScreen(new BoomboxScreen(Text.literal("Ballin"), this));
+                MinecraftClient.getInstance().setScreen(new BoomboxScreen(Text.literal("Boombox Screen"), this));
                 return ActionResult.SUCCESS;
             }
         }
@@ -201,8 +200,6 @@ public class BoomBoxEntity extends Entity {
             MusicManager.remove(this.dataTracker.get(MUSIC_UUID).get().toString());
         }
 
-        //this.setMusicUUID(UUID.randomUUID());
-
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeString(youtubeLink);
         buf.writeFloat((float) volume);
@@ -212,14 +209,7 @@ public class BoomBoxEntity extends Entity {
         buf.writeUuid(musicOwner);
 
         ClientPlayNetworking.send(ModPackets.BOOMBOX_PLAY_C2S, buf);
-        /*CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink));
-        futureFfmpeg.thenAccept(path -> this.playMusic(path, (float) volume, this.dataTracker.get(MUSIC_UUID).get()));*/
     }
-
-    /*private void playMusic(Path outputFile, float volume, UUID uuid){
-        MUSIC = new Sound(outputFile, this.getPos(), volume, uuid);
-        MUSIC.play();
-    }*/
 
     public void setMusicUUID(UUID uuid){
         this.dataTracker.set(MUSIC_UUID, Optional.of(uuid));
