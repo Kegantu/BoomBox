@@ -56,6 +56,15 @@ public class BoomBoxEntity extends Entity {
         this.prevZ = position.z;
     }
 
+    public BoomBoxEntity(World world, Vec3d position, UUID musicUUID) {
+        super(ModEntities.BOOMBOX_ENTITY, world);
+        this.setPosition(position);
+        this.prevX = position.x;
+        this.prevY = position.y;
+        this.prevZ = position.z;
+        this.dataTracker.set(MUSIC_UUID, Optional.of(musicUUID));
+    }
+
     @Override
     protected void initDataTracker() {
         this.dataTracker.startTracking(MUSIC_UUID, Optional.empty());
@@ -158,6 +167,9 @@ public class BoomBoxEntity extends Entity {
         if (!this.getWorld().isClient()) {
             if (!player.isSneaking()){
                 ItemStack itemStack = new ItemStack(ModItems.BOOMBOX);
+                if (this.dataTracker.get(MUSIC_UUID).isPresent()){
+                    itemStack.getOrCreateSubNbt("MusicUUID").putString("UUID", this.dataTracker.get(MUSIC_UUID).get().toString());
+                }
                 Item item = itemStack.getItem();
                 int i = itemStack.getCount();
                 if (!player.getInventory().insertStack(itemStack)) {

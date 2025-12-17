@@ -2,6 +2,7 @@ package me.kegantu.boombox.soundsystem;
 
 import me.kegantu.boombox.BoomBox;
 import net.minecraft.util.math.Vec3d;
+import org.joml.Vector3f;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.EXTLinearDistance;
 import org.lwjgl.stb.STBVorbis;
@@ -72,6 +73,10 @@ public class Sound {
         BoomBox.LOGGER.info(String.valueOf(volume));
         BoomBox.LOGGER.info(String.valueOf(position));
         BoomBox.LOGGER.info(AL10.alGetError() + " default settings");
+    }
+
+    public void setPosition(Vector3f position){
+        AL10.alSource3f(soundSourceID, AL10.AL_POSITION, position.x, position.y, position.z);
     }
 
     public void play(){

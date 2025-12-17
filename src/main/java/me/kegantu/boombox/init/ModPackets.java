@@ -16,6 +16,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
+import org.joml.Vector3f;
 
 import java.nio.file.Path;
 import java.util.UUID;
@@ -25,6 +26,7 @@ public class ModPackets {
 
     public static final Identifier BOOMBOX_PLAY_S2C = new Identifier(BoomBox.MOD_ID, "boombox_play_client");
     public static final Identifier BOOMBOX_STOP_S2C = new Identifier(BoomBox.MOD_ID, "boombox_stop_client");
+    public static final Identifier SOUND_POSITION_UPDATE_S2C = new Identifier(BoomBox.MOD_ID, "sound_position_update_client");
 
     public static final Identifier BOOMBOX_PLAY_C2S = new Identifier(BoomBox.MOD_ID, "boombox_play_server");
     public static final Identifier BOOMBOX_STOP_C2S = new Identifier(BoomBox.MOD_ID, "boombox_stop_server");
@@ -95,6 +97,18 @@ public class ModPackets {
                 MusicManager.getSound(musicUUID).stop();
                 MusicManager.remove(musicUUID);
             }
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(SOUND_POSITION_UPDATE_S2C, (client, handler, buf, responseSender) -> {
+            Vector3f position = buf.readVector3f();
+            String musicUUID = buf.readString();
+
+            if (MusicManager.getSound(musicUUID) == null){
+                BoomBox.LOGGER.info("ne na hod");
+                return;
+            }
+
+            MusicManager.getSound(musicUUID).setPosition(position);
         });
     }
 
