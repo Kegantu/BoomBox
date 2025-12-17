@@ -1,8 +1,5 @@
 package me.kegantu.boombox.soundsystem;
 
-import me.kegantu.boombox.BoomBox;
-
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -14,13 +11,10 @@ public class MusicManager {
     }
 
     public static void remove(Sound music){
-        //music.stop();
         CURRENTLY_PLAYING_MUSIC.remove(music);
     }
 
     public static void remove(String key){
-       /* BoomBox.LOGGER.info(key + "MUSIC MANAGER");
-        CURRENTLY_PLAYING_MUSIC.get(key).stop();*/
         CURRENTLY_PLAYING_MUSIC.remove(key);
     }
 
