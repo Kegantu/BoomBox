@@ -31,7 +31,9 @@ public class BoomBoxItem extends Item {
                 if (stack.getSubNbt("MusicUUID") != null){
                     PacketByteBuf buf = PacketByteBufs.create();
                     buf.writeString(stack.getSubNbt("MusicUUID").getString("UUID"));
-                    ServerPlayNetworking.send((ServerPlayerEntity) user, ModPackets.BOOMBOX_STOP_C2S, buf);
+                    for (ServerPlayerEntity playerEntity : world.getServer().getPlayerManager().getPlayerList()){
+                        ServerPlayNetworking.send(playerEntity, ModPackets.BOOMBOX_STOP_S2C, buf);
+                    }
                     stack.getNbt().remove("MusicUUID");
                 }
                 return TypedActionResult.success(stack, true);
