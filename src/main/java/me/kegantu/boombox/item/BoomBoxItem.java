@@ -3,6 +3,8 @@ package me.kegantu.boombox.item;
 import me.kegantu.boombox.BoomBox;
 import me.kegantu.boombox.entity.BoomBoxEntity;
 import me.kegantu.boombox.init.ModPackets;
+import me.kegantu.boombox.soundsystem.MusicManager;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
@@ -59,7 +61,16 @@ public class BoomBoxItem extends Item {
         if (stack.getSubNbt("MusicUUID") == null){
             return;
         }
-        if (!selected){
+
+        if (MusicManager.getSound(stack.getSubNbt("MusicUUID").getString("UUID")) == null){
+            return;
+        }
+
+        if (!MusicManager.getSound(stack.getSubNbt("MusicUUID").getString("UUID")).isPlaying()){
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeString(stack.getSubNbt("MusicUUID").getString("UUID"));
+            stack.getNbt().remove("MusicUUID");
+            ClientPlayNetworking.send(ModPackets.BOOMBOX_STOP_C2S, buf);
             return;
         }
 

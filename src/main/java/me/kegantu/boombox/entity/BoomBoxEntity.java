@@ -172,8 +172,14 @@ public class BoomBoxEntity extends Entity {
                 }
                 Item item = itemStack.getItem();
                 int i = itemStack.getCount();
-                if (!player.getInventory().insertStack(itemStack)) {
-                    return ActionResult.PASS;
+                if (player.getMainHandStack().isEmpty()){
+                    if (!player.getInventory().insertStack(itemStack)) {
+                        return ActionResult.PASS;
+                    }
+                } else {
+                    if (!player.getInventory().insertStack(40, itemStack)) {
+                        return ActionResult.PASS;
+                    }
                 }
 
                 player.sendPickup(this, i);

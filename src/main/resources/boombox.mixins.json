@@ -3,10 +3,14 @@
 	"package": "me.kegantu.boombox.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-      "PlayerEntityMixin"
+      "PlayerEntityMixin",
+		"PlayerInventoryMixin"
 	],
 	"client": [
-		"MinecraftClientMixin"
+		"MinecraftClientMixin",
+		"BipedEntityModelMixin",
+		"HeldItemFeatureRendererMixin",
+		"ClientPlayerEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
