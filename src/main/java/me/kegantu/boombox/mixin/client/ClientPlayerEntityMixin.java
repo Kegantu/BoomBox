@@ -1,4 +1,4 @@
-package me.kegantu.boombox.mixin;
+package me.kegantu.boombox.mixin.client;
 
 import com.mojang.authlib.GameProfile;
 import me.kegantu.boombox.init.ModItems;

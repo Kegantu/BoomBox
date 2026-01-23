@@ -7,10 +7,12 @@
 		"PlayerInventoryMixin"
 	],
 	"client": [
-		"MinecraftClientMixin",
-		"BipedEntityModelMixin",
-		"HeldItemFeatureRendererMixin",
-		"ClientPlayerEntityMixin"
+		"client.MinecraftClientMixin",
+		"client.BipedEntityModelMixin",
+		"client.HeldItemFeatureRendererMixin",
+		"client.ClientPlayerEntityMixin",
+		"client.ModelLoaderMixin",
+		"client.ItemRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

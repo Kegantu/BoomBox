@@ -1,7 +1,6 @@
-package me.kegantu.boombox.mixin;
+package me.kegantu.boombox.mixin.client;
 
 import me.kegantu.boombox.init.ModItems;
-import me.kegantu.boombox.soundsystem.MusicManager;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;

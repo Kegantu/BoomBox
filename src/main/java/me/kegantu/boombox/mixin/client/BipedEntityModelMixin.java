@@ -1,4 +1,4 @@
-package me.kegantu.boombox.mixin;
+package me.kegantu.boombox.mixin.client;
 
 import me.kegantu.boombox.init.ModItems;
 import net.minecraft.client.model.ModelPart;

@@ -1,13 +1,11 @@
-package me.kegantu.boombox.mixin;
+package me.kegantu.boombox.mixin.client;
 
-import me.kegantu.boombox.init.ModItems;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.GameOptions;
-import net.minecraft.util.Hand;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
