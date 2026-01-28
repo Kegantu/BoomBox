@@ -44,6 +44,7 @@ public class BoomBoxItem extends Item {
             if (stack.getSubNbt("MusicUUID") != null){
                 BoomBoxEntity boomBoxEntity = new BoomBoxEntity(world, user.getPos(), UUID.fromString(stack.getSubNbt("MusicUUID").getString("UUID")));
                 stack.getNbt().remove("MusicUUID");
+                stack.decrement(1);
                 boomBoxEntity.setYaw(user.getYaw());
                 world.spawnEntity(boomBoxEntity);
                 return TypedActionResult.success(stack, true);
