@@ -1,5 +1,6 @@
 package me.kegantu.boombox.mixin;
 
+import me.kegantu.boombox.BoomBox;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -21,5 +22,10 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 	@Inject(method = "tick", at = @At(value = "TAIL"))
 	private void tick(CallbackInfo ci){
 		//AL10.alListener3f(AL10.AL_POSITION, (float) this.getX(), (float) getY(), (float) getZ());
+	}
+
+	@Inject(method = "closeHandledScreen", at = @At("HEAD"))
+	private void resetLastUsedChestBlockPos(CallbackInfo ci){
+		BoomBox.lastUsedChestBlockPos = null;
 	}
 }

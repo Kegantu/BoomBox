@@ -30,6 +30,7 @@ public class ModPackets {
 
     public static final Identifier BOOMBOX_PLAY_C2S = new Identifier(BoomBox.MOD_ID, "boombox_play_server");
     public static final Identifier BOOMBOX_STOP_C2S = new Identifier(BoomBox.MOD_ID, "boombox_stop_server");
+    public static final Identifier SOUND_POSITION_UPDATE_C2S = new Identifier(BoomBox.MOD_ID, "sound_position_update_server");
 
     public static void registerC2SPackets(){
         ServerPlayNetworking.registerGlobalReceiver(BOOMBOX_PLAY_C2S,
@@ -63,6 +64,17 @@ public class ModPackets {
                         ServerPlayNetworking.send(playerEntity, BOOMBOX_STOP_S2C, bufClient);
                     }
         });
+
+        ServerPlayNetworking.registerGlobalReceiver(SOUND_POSITION_UPDATE_C2S,
+                (server, player, handler, buf, responseSender) -> {
+                    PacketByteBuf bufClient = PacketByteBufs.create();
+                    bufClient.writeVector3f(buf.readVector3f());
+                    bufClient.writeString(buf.readString());
+
+                    for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()){
+                        ServerPlayNetworking.send(playerEntity, SOUND_POSITION_UPDATE_S2C, bufClient);
+                    }
+                });
     }
 
     public static void registerS2CPackets(){
