@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
@@ -21,6 +22,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
@@ -31,15 +33,23 @@ public abstract class ScreenHandlerMixin {
 
     @Shadow @Final public DefaultedList<Slot> slots;
 
+    @Shadow public abstract ItemStack quickMove(PlayerEntity player, int slot);
+
     @Inject(method = "internalOnSlotClick", at = @At("HEAD"), cancellable = true)
     private void insertBoombox(int slotIndex, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci){
-        ItemStack stack = this.getCursorStack();
+        ItemStack stack = this.getCursorStack().isEmpty() ? quickMove(player, slotIndex) : this.getCursorStack();
 
         if (!stack.isOf(ModItems.BOOMBOX)){
             return;
         }
 
-        String UUID = stack.getSubNbt("MusicUUID").getString("UUID");
+        NbtCompound musicUUIDCompound = stack.getSubNbt("MusicUUID");
+
+        if (musicUUIDCompound == null){
+            return;
+        }
+
+        String UUID = musicUUIDCompound.getString("UUID");
         Sound sound = MusicManager.getSound(UUID);
 
         if (sound == null){
