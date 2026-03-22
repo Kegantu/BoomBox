@@ -46,14 +46,4 @@ public class MinecraftClientMixin {
             music.get(i).stop();
         }
     }
-/*
-    @Inject(method = "handleInputEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/KeyBinding;wasPressed()Z", ordinal = 6), cancellable = true)
-    private void dropItem(CallbackInfo ci){
-        while (this.options.dropKey.wasPressed()){
-            if (!this.player.isSpectator() && !this.player.getActiveItem().isOf(ModItems.BOOMBOX) && this.player.dropSelectedItem(Screen.hasControlDown())) {
-                this.player.swingHand(Hand.MAIN_HAND);
-                ci.cancel();
-            }
-        }
-    }*/
 }
