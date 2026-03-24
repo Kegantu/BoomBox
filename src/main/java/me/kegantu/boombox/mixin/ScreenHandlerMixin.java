@@ -22,7 +22,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
@@ -39,11 +38,11 @@ public abstract class ScreenHandlerMixin {
     private void insertBoombox(int slotIndex, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci){
         ItemStack stack = this.getCursorStack().isEmpty() ? quickMove(player, slotIndex) : this.getCursorStack();
 
-        if (!stack.isOf(ModItems.BOOMBOX)){
-            return;
+        if (stack.isOf(ModItems.BOOMBOX)){
+            ci.cancel();
         }
 
-        NbtCompound musicUUIDCompound = stack.getSubNbt("MusicUUID");
+        /*NbtCompound musicUUIDCompound = stack.getSubNbt("MusicUUID");
 
         if (musicUUIDCompound == null){
             return;
@@ -66,14 +65,14 @@ public abstract class ScreenHandlerMixin {
         buf.writeString(UUID);
 
         //sound.setPosition(chestPosition);
-        ClientPlayNetworking.send(ModPackets.SOUND_POSITION_UPDATE_C2S, buf);
+        ClientPlayNetworking.send(ModPackets.SOUND_POSITION_UPDATE_C2S, buf);*/
     }
 
     //@Inject(method = "insertItem")
 
     @Inject(method = "updateSlotStacks", at = @At("TAIL"))
     private void updateBoombox(int revision, List<ItemStack> stacks, ItemStack cursorStack, CallbackInfo ci){
-        for (int i = 0; i < stacks.size(); i++) {
+        /*for (int i = 0; i < stacks.size(); i++) {
             if (!stacks.get(i).isOf(ModItems.BOOMBOX)){
                 continue;
             }
@@ -92,6 +91,6 @@ public abstract class ScreenHandlerMixin {
             }
 
             stacks.get(i).getNbt().remove("MusicUUID");
-        }
+        }*/
     }
 }
