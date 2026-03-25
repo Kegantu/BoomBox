@@ -23,6 +23,9 @@
 		],
 		"client": [
 			"me.kegantu.boombox.client.BoomBoxClient"
+		],
+		"cardinal-components": [
+			"me.kegantu.boombox.BoomBox"
 		]
 	},
 	"mixins": [
@@ -37,5 +40,10 @@
 	"suggests": {
 		"another-mod": "*"
 	},
-	"accessWidener": "boombox.accesswidener"
+	"accessWidener": "boombox.accesswidener",
+	"custom": {
+		"cardinal-components": [
+			"boombox:boombox_component"
+		]
+	}
 }

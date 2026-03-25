@@ -10,6 +10,9 @@ import me.kegantu.boombox.utils.YoutubeUtils;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -27,10 +30,12 @@ public class ModPackets {
     public static final Identifier BOOMBOX_PLAY_S2C = new Identifier(BoomBox.MOD_ID, "boombox_play_client");
     public static final Identifier BOOMBOX_STOP_S2C = new Identifier(BoomBox.MOD_ID, "boombox_stop_client");
     public static final Identifier SOUND_POSITION_UPDATE_S2C = new Identifier(BoomBox.MOD_ID, "sound_position_update_client");
+    public static final Identifier TIE_ITEMSTACK_SOUND_S2C = new Identifier(BoomBox.MOD_ID, "tie_itemstack_sound_client");
 
     public static final Identifier BOOMBOX_PLAY_C2S = new Identifier(BoomBox.MOD_ID, "boombox_play_server");
     public static final Identifier BOOMBOX_STOP_C2S = new Identifier(BoomBox.MOD_ID, "boombox_stop_server");
     public static final Identifier SOUND_POSITION_UPDATE_C2S = new Identifier(BoomBox.MOD_ID, "sound_position_update_server");
+    public static final Identifier CLEAN_ITEMSTACK_C2S = new Identifier(BoomBox.MOD_ID, "clean_itemstack_server");
 
     public static void registerC2SPackets(){
         ServerPlayNetworking.registerGlobalReceiver(BOOMBOX_PLAY_C2S,
@@ -74,6 +79,49 @@ public class ModPackets {
                     for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()){
                         ServerPlayNetworking.send(playerEntity, SOUND_POSITION_UPDATE_S2C, bufClient);
                     }
+                });
+
+        ServerPlayNetworking.registerGlobalReceiver(CLEAN_ITEMSTACK_C2S,
+                (server, player, handler, buf, responseSender) -> {
+                    ItemStack stack = buf.readItemStack();
+                    String musicUUID = buf.readString();
+                    UUID playerUUID = buf.readUuid();
+                    PlayerEntity holderPlayerEntity = server.getPlayerManager().getPlayer(playerUUID);
+
+                    if (!stack.getSubNbt("MusicUUID").getString("UUID").equals(musicUUID)){
+                        return;
+                    }
+
+                    //stack.getNbt().remove("MusicUUID");
+                    BoomBox.LOGGER.info("GEGE THERE'S NOTHING WE CAN DO ABOUT IT");
+                    /*for (int i = 0; i < server.getPlayerManager().getPlayer(playerUUID).getInventory().main.size(); i++) {
+                        ItemStack stack1 = server.getPlayerManager().getPlayer(playerUUID).getInventory().main.get(i);
+                        if (stack1.isEmpty() || !stack1.isOf(ModItems.BOOMBOX)){
+                            continue;
+                        }
+
+                        if (stack1.getSubNbt("MusicUUID") == null){
+                            continue;
+                        }
+
+                        if (!stack1.getSubNbt("MusicUUID").getString("UUID").equals(musicUUID)){
+                            continue;
+                        }
+
+                        stack1.getNbt().remove("MusicUUID");
+                    }*/
+
+                    if (stack.getSubNbt("MusicUUID") == null){
+                        return;
+                    }
+
+                    ItemStack realStack = holderPlayerEntity.getInventory().getStack(holderPlayerEntity.getInventory().getSlotWithStack(stack));
+
+                    if (!realStack.getSubNbt("MusicUUID").getString("UUID").equals(musicUUID)){
+                        return;
+                    }
+
+                    realStack.getNbt().remove("MusicUUID");
                 });
     }
 
@@ -121,6 +169,19 @@ public class ModPackets {
             }
 
             MusicManager.getSound(musicUUID).setPosition(position);
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(TIE_ITEMSTACK_SOUND_S2C, (client, handler, buf, responseSender) -> {
+            ItemStack stack = buf.readItemStack();
+            String musicUUID = buf.readString();
+            UUID playerUUID = buf.readUuid();
+
+            if (MusicManager.getSound(musicUUID) == null){
+                BoomBox.LOGGER.info("ne na hod");
+                return;
+            }
+
+            MusicManager.getSound(musicUUID).setStack(stack, playerUUID);
         });
     }
 

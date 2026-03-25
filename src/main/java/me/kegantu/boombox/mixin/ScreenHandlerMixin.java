@@ -1,12 +1,15 @@
 package me.kegantu.boombox.mixin;
 
 import me.kegantu.boombox.BoomBox;
+import me.kegantu.boombox.cca.BoomboxComponent;
 import me.kegantu.boombox.init.ModItems;
 import me.kegantu.boombox.init.ModPackets;
+import me.kegantu.boombox.cca.interfaces.CustomPlayerData;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -15,6 +18,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,13 +40,17 @@ public abstract class ScreenHandlerMixin {
 
     @Inject(method = "internalOnSlotClick", at = @At("HEAD"), cancellable = true)
     private void insertBoombox(int slotIndex, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci){
-        ItemStack stack = this.getCursorStack().isEmpty() ? quickMove(player, slotIndex) : this.getCursorStack();
+        ItemStack stack = this.getCursorStack();
 
-        if (stack.isOf(ModItems.BOOMBOX)){
-            ci.cancel();
+        if (actionType == SlotActionType.QUICK_MOVE){
+            stack = this.slots.get(slotIndex).getStack();
         }
 
-        /*NbtCompound musicUUIDCompound = stack.getSubNbt("MusicUUID");
+        if (!stack.isOf(ModItems.BOOMBOX)){
+            return;
+        }
+
+        NbtCompound musicUUIDCompound = stack.getSubNbt("MusicUUID");
 
         if (musicUUIDCompound == null){
             return;
@@ -50,6 +58,8 @@ public abstract class ScreenHandlerMixin {
 
         String UUID = musicUUIDCompound.getString("UUID");
         Sound sound = MusicManager.getSound(UUID);
+        BoomboxComponent component = BoomboxComponent.get(player);
+        BlockPos lastPos = component.getLastUsedLootableBlockEntity();
 
         if (sound == null){
             return;
@@ -65,7 +75,7 @@ public abstract class ScreenHandlerMixin {
         buf.writeString(UUID);
 
         //sound.setPosition(chestPosition);
-        ClientPlayNetworking.send(ModPackets.SOUND_POSITION_UPDATE_C2S, buf);*/
+        ClientPlayNetworking.send(ModPackets.SOUND_POSITION_UPDATE_C2S, buf);
     }
 
     //@Inject(method = "insertItem")

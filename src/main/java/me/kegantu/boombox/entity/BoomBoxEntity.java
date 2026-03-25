@@ -11,6 +11,7 @@ import me.kegantu.boombox.soundsystem.Sound;
 import me.kegantu.boombox.utils.AudioDownloader;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -24,6 +25,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
@@ -169,6 +171,14 @@ public class BoomBoxEntity extends Entity {
                 ItemStack itemStack = new ItemStack(ModItems.BOOMBOX);
                 if (this.dataTracker.get(MUSIC_UUID).isPresent()){
                     itemStack.getOrCreateSubNbt("MusicUUID").putString("UUID", this.dataTracker.get(MUSIC_UUID).get().toString());
+                    PacketByteBuf buf = PacketByteBufs.create();
+                    buf.writeItemStack(itemStack);
+                    buf.writeString(this.dataTracker.get(MUSIC_UUID).get().toString());
+                    buf.writeUuid(player.getUuid());
+
+                    for (ServerPlayerEntity playerEntity : this.getWorld().getServer().getPlayerManager().getPlayerList()){
+                        ServerPlayNetworking.send(playerEntity, ModPackets.TIE_ITEMSTACK_SOUND_S2C, buf);
+                    }
                 }
                 Item item = itemStack.getItem();
                 int i = itemStack.getCount();

@@ -1,9 +1,15 @@
 package me.kegantu.boombox.soundsystem;
 
 import me.kegantu.boombox.BoomBox;
+import me.kegantu.boombox.init.ModPackets;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
 import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.AL11;
 import org.lwjgl.openal.EXTLinearDistance;
 import org.lwjgl.stb.STBVorbis;
 import org.lwjgl.system.MemoryStack;
@@ -12,15 +18,25 @@ import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.nio.file.Path;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Sound {
 
-    private int soundBufferID;
-    private int soundSourceID;
-    private float volume;
+    protected int soundBufferID;
+    protected int soundSourceID;
+    protected float volume;
+    protected int monoSamplesSize;
+    protected int sampleRate;
+    protected float length;
+    private ItemStack tiedStack;
+    private UUID assignUUID;
+    private UUID playerUUID;
 
     public Sound(Path soundPath, Vec3d position, double volume, UUID uuid){
         MusicManager.addMusic(uuid.toString(), this);
+        this.assignUUID = uuid;
         this.volume = (float) volume;
 
         MemoryStack.stackPush();
@@ -48,6 +64,10 @@ public class Sound {
         var sampleRate = sampleRateBuffer.get();
         MemoryStack.stackPop();
         MemoryStack.stackPop();
+
+        monoSamplesSize = mono.length;
+        this.sampleRate = sampleRate;
+        length = (float) mono.length / sampleRate;
 
         soundBufferID = AL10.alGenBuffers();
         BoomBox.LOGGER.info(String.valueOf(AL10.alGetError()));
@@ -85,6 +105,18 @@ public class Sound {
 
     public void stop(){
         AL10.alSourceStop(soundSourceID);
+
+        if (!tiedStack.isEmpty()){
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeItemStack(tiedStack);
+            buf.writeString(assignUUID.toString());
+
+            PacketByteBuf boomboxStopBuf = PacketByteBufs.copy(buf);
+            buf.writeUuid(playerUUID);
+
+            ClientPlayNetworking.send(ModPackets.CLEAN_ITEMSTACK_C2S, buf);
+            ClientPlayNetworking.send(ModPackets.BOOMBOX_STOP_C2S, boomboxStopBuf);
+        }
     }
 
     public void pause(){
@@ -101,5 +133,15 @@ public class Sound {
 
     public boolean isPlaying(){
         return AL10.alGetSourcei(soundSourceID, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING;
+    }
+
+    public void setStack(ItemStack stack, UUID playerUUID){
+        this.tiedStack = stack;
+        this.playerUUID = playerUUID;
+
+        BoomBox.LOGGER.info(String.valueOf(tiedStack));
+        float leftPlayback = length - AL11.alGetSourcef(soundSourceID, AL11.AL_SEC_OFFSET);
+        ScheduledExecutorService scheduleService = Executors.newSingleThreadScheduledExecutor();
+        scheduleService.schedule(this::stop, (long) leftPlayback, TimeUnit.SECONDS);
     }
 }
