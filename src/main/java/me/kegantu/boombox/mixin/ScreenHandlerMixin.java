@@ -36,7 +36,24 @@ public abstract class ScreenHandlerMixin {
 
     @Inject(method = "internalOnSlotClick", at = @At("HEAD"), cancellable = true)
     private void insertBoombox(int slotIndex, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci){
-        ItemStack stack = this.getCursorStack().isEmpty() ? quickMove(player, slotIndex) : this.getCursorStack();
+        ItemStack stack = this.getCursorStack();
+
+        if (actionType == SlotActionType.QUICK_MOVE){
+            stack = this.slots.get(slotIndex).getStack();
+        }
+
+        NbtCompound musicUUIDCompound = stack.getSubNbt("MusicUUID");
+
+        if (musicUUIDCompound == null){
+            return;
+        }
+
+        BoomBox.LOGGER.info(String.valueOf(slotIndex));
+        BoomBox.LOGGER.info(String.valueOf(slots.size()));
+
+        if (slotIndex > slots.size() - 37){
+            return;
+        }
 
         if (stack.isOf(ModItems.BOOMBOX)){
             ci.cancel();

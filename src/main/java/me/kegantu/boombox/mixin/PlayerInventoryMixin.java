@@ -1,5 +1,8 @@
 package me.kegantu.boombox.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import me.kegantu.boombox.BoomBox;
 import me.kegantu.boombox.init.ModItems;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -11,7 +14,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerInventory.class)
@@ -25,7 +27,7 @@ public abstract class PlayerInventoryMixin {
 
     @Inject(method = "writeNbt", at = @At("HEAD"), cancellable = true)
     private void writeNbt(NbtList nbtList, CallbackInfoReturnable<NbtList> cir){
-        for (int i = 0; i < this.main.size(); i++) {
+        /*for (int i = 0; i < this.main.size(); i++) {
             ItemStack stack = this.main.get(i);
             if (stack.isEmpty()) {
                 continue;
@@ -68,6 +70,22 @@ public abstract class PlayerInventoryMixin {
             nbtList.add(nbtCompound);
         }
 
-        cir.setReturnValue(nbtList);
+        cir.setReturnValue(nbtList);*/
+    }
+
+    @WrapOperation(method = "readNbt", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;fromNbt(Lnet/minecraft/nbt/NbtCompound;)Lnet/minecraft/item/ItemStack;"))
+    private ItemStack readNbt(NbtCompound nbt, Operation<ItemStack> original){
+        ItemStack stack = original.call(nbt);
+
+        if (!stack.isOf(ModItems.BOOMBOX)){
+            return stack;
+        }
+
+        if (stack.getNbt() == null){
+            return stack;
+        }
+
+        stack.getNbt().remove("MusicUUID");
+        return stack;
     }
 }

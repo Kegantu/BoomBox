@@ -6,13 +6,13 @@
       "PlayerEntityMixin",
 		"PlayerInventoryMixin",
 		"ChestBlockMixin",
-		"ScreenHandlerMixin"
+		"ScreenHandlerMixin",
+		"ItemEntityMixin"
 	],
 	"client": [
 		"client.MinecraftClientMixin",
 		"client.BipedEntityModelMixin",
 		"client.HeldItemFeatureRendererMixin",
-		"client.ClientPlayerEntityMixin",
 		"client.ModelLoaderMixin",
 		"client.ItemRendererMixin"
 	],
