@@ -30,12 +30,10 @@ public abstract class ItemEntityMixin extends Entity {
         ItemStack stack = this.getStack();
 
         if (!stack.isOf(ModItems.BOOMBOX)){
-            BoomBox.LOGGER.info("CH");
             return;
         }
 
         if (stack.getSubNbt("MusicUUID") == null){
-            BoomBox.LOGGER.info("CHO");
             return;
         }
 
@@ -43,7 +41,6 @@ public abstract class ItemEntityMixin extends Entity {
             return;
         }
 
-        BoomBox.LOGGER.info("WHAT");
         BoomBoxEntity boomBoxEntity = new BoomBoxEntity(this.getWorld(), this.getPos(), UUID.fromString(stack.getSubNbt("MusicUUID").getString("UUID")));
         stack.getNbt().remove("MusicUUID");
         stack.decrement(1);
