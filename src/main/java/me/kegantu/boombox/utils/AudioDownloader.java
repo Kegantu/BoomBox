@@ -14,19 +14,21 @@ import java.util.concurrent.TimeUnit;
 
 public class AudioDownloader {
 
-    public static Path download(String youtubeURL) {
-        File saveDirectory = new File(FabricLoader.getInstance().getGameDir() + "\\music");
+    public static final File SAVE_DIRECTORY = new File(FabricLoader.getInstance().getGameDir() + "\\music");
 
-        if (!saveDirectory.exists()){
-            saveDirectory.mkdirs();
+    public static Path download(String youtubeURL, String uuidFileName) {
+        String savePath = SAVE_DIRECTORY.toPath() + "\\";
+
+        if (!SAVE_DIRECTORY.exists()){
+            SAVE_DIRECTORY.mkdirs();
         }
 
         try {
             Youtube youtubeVideo = new Youtube(youtubeURL);
 
-            youtubeVideo.streams().filter(StreamQuery.Filter.builder().type("audio").build()).getFirst().download(saveDirectory + "\\", "youtube");
+            youtubeVideo.streams().filter(StreamQuery.Filter.builder().type("audio").build()).getFirst().download(savePath, uuidFileName);
 
-            String[] command = {FFmpegDownloader.FFMPEG_LOCATION, "-y", "-i", saveDirectory + "\\youtube.mp4", saveDirectory + "\\output.ogg"};
+            String[] command = {FFmpegDownloader.FFMPEG_LOCATION, "-y", "-i", savePath + uuidFileName + ".mp4", savePath + uuidFileName + ".ogg"};
             ProcessBuilder ffmpegBuilder = new ProcessBuilder(command);
             ffmpegBuilder.redirectErrorStream(true);
             Process ffmpeg = ffmpegBuilder.start();
@@ -49,6 +51,6 @@ public class AudioDownloader {
             throw new RuntimeException(e);
         }
 
-        return Path.of(saveDirectory + "\\output.ogg");
+        return Path.of(savePath + uuidFileName + ".ogg");
     }
 }

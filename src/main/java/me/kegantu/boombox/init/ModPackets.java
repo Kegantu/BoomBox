@@ -86,7 +86,7 @@ public class ModPackets {
             UUID musicOwner = buf.readUuid();
             BoomBox.LOGGER.info(uuid + " client play");
 
-            CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink));
+            CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink, uuid));
             futureFfmpeg.whenComplete((path, exception) -> {
                 if (exception != null && client.player.squaredDistanceTo(new Vec3d(position.toVector3f())) <= 16 * 16 && client.player.getUuid() == musicOwner) {
                     client.player.sendMessage(Text.literal("Failed To Download an Audio").formatted(Formatting.RED), true);
