@@ -3,18 +3,28 @@ package me.kegantu.boombox.utils;
 import com.github.felipeucelli.javatube.StreamQuery;
 import com.github.felipeucelli.javatube.Youtube;
 import me.kegantu.boombox.BoomBox;
+import me.kegantu.boombox.soundsystem.MusicManager;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AudioDownloader {
 
     public static final File SAVE_DIRECTORY = new File(FabricLoader.getInstance().getGameDir() + "\\music");
+    private static final int MAX_MP4_AMOUNT = 3;
 
     public static Path download(String youtubeURL, String uuidFileName) {
         String savePath = SAVE_DIRECTORY.toPath() + "\\";
@@ -22,6 +32,8 @@ public class AudioDownloader {
         if (!SAVE_DIRECTORY.exists()){
             SAVE_DIRECTORY.mkdirs();
         }
+
+        checkSaveDirectorySize();
 
         try {
             Youtube youtubeVideo = new Youtube(youtubeURL);
@@ -52,5 +64,40 @@ public class AudioDownloader {
         }
 
         return Path.of(savePath + uuidFileName + ".ogg");
+    }
+
+    private static void checkSaveDirectorySize(){
+        try (Stream<Path> fileWalk = Files.walk(SAVE_DIRECTORY.toPath())){
+            List<File> files = fileWalk.filter(Files::isRegularFile).filter(path -> path.toString().endsWith(".mp4"))
+                    .map(Path::toFile).collect(Collectors.toCollection((ArrayList::new)));
+
+            if (files.size() >= MAX_MP4_AMOUNT){
+                cleanSaveDirectory(files);
+            }
+        } catch (Exception e) {
+            //throw new RuntimeException(e);
+            e.printStackTrace();
+        }
+    }
+
+    public static void cleanSaveDirectory(List<File> files){
+        do {
+            File randomFile = files.get(new Random().nextInt(0, files.size()));
+
+            String randomFileName = randomFile.getName().substring(0, randomFile.getName().lastIndexOf('.'));
+
+            if (MusicManager.getSound(randomFileName) == null){
+                files.remove(randomFile);
+                BoomBox.LOGGER.info(String.valueOf(randomFile.delete()));
+                continue;
+            }
+
+            if (MusicManager.getSound(randomFileName).isPlaying()){
+                continue;
+            }
+
+            files.remove(randomFile);
+            BoomBox.LOGGER.info(String.valueOf(randomFile.delete()));
+        }while (files.size() >= MAX_MP4_AMOUNT);
     }
 }
