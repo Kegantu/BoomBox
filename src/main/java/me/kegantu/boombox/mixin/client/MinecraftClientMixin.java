@@ -2,6 +2,7 @@ package me.kegantu.boombox.mixin.client;
 
 import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
+import me.kegantu.boombox.utils.AudioDownloader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -45,5 +46,10 @@ public class MinecraftClientMixin {
         for (int i = 0; i < music.size(); i++) {
             music.get(i).stop();
         }
+    }
+
+    @Inject(method = "close", at = @At("HEAD"))
+    private void onQuitGame(CallbackInfo ci){
+        AudioDownloader.cleanAllSaveDirectory();
     }
 }

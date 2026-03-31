@@ -83,12 +83,14 @@ public class AudioDownloader {
     public static void cleanSaveDirectory(List<File> files){
         do {
             File randomFile = files.get(new Random().nextInt(0, files.size()));
+            File randomFileOGG = new File(randomFile.getAbsolutePath().replace(".mp4", ".ogg"));
 
             String randomFileName = randomFile.getName().substring(0, randomFile.getName().lastIndexOf('.'));
 
             if (MusicManager.getSound(randomFileName) == null){
                 files.remove(randomFile);
-                BoomBox.LOGGER.info(String.valueOf(randomFile.delete()));
+                randomFile.delete();
+                randomFileOGG.delete();
                 continue;
             }
 
@@ -97,7 +99,24 @@ public class AudioDownloader {
             }
 
             files.remove(randomFile);
-            BoomBox.LOGGER.info(String.valueOf(randomFile.delete()));
+            randomFile.delete();
+            randomFileOGG.delete();
         }while (files.size() >= MAX_MP4_AMOUNT);
+    }
+
+    public static void cleanAllSaveDirectory(){
+        try (Stream<Path> fileWalk = Files.walk(SAVE_DIRECTORY.toPath())){
+            List<File> files = fileWalk.filter(Files::isRegularFile).map(Path::toFile)
+                    .filter(file -> !file.isDirectory()).collect(Collectors.toCollection((ArrayList::new)));
+
+            for (int i = 0; i < files.size(); i++) {
+                File file = files.get(i);
+                files.remove(file);
+                file.delete();
+            }
+        } catch (Exception e) {
+            //throw new RuntimeException(e);
+            e.printStackTrace();
+        }
     }
 }
