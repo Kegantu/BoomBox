@@ -75,7 +75,6 @@ public class AudioDownloader {
                 cleanSaveDirectory(files);
             }
         } catch (Exception e) {
-            //throw new RuntimeException(e);
             e.printStackTrace();
         }
     }
@@ -115,7 +114,6 @@ public class AudioDownloader {
                 file.delete();
             }
         } catch (Exception e) {
-            //throw new RuntimeException(e);
             e.printStackTrace();
         }
     }
