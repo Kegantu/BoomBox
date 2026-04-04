@@ -14,7 +14,8 @@
 		"client.BipedEntityModelMixin",
 		"client.HeldItemFeatureRendererMixin",
 		"client.ModelLoaderMixin",
-		"client.ItemRendererMixin"
+		"client.ItemRendererMixin",
+		"client.ToastManagerEntryMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

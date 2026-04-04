@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 public class AudioDownloader {
 
     public static final File SAVE_DIRECTORY = new File(FabricLoader.getInstance().getGameDir() + "\\music");
-    private static final int MAX_MP4_AMOUNT = 3;
+    private static final int MAX_MP4_AMOUNT = 5;
 
     public static Path download(String youtubeURL, String uuidFileName) {
         String savePath = SAVE_DIRECTORY.toPath() + "\\";
