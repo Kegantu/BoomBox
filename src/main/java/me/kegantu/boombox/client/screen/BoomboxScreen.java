@@ -41,8 +41,8 @@ public class BoomboxScreen extends Screen {
             entity.downloadMusic(youtubeLink, volume, client.player.getUuid());
             this.client.player.sendMessage(Text.literal("Downloading an audio..."), true);
             this.client.setScreen(null);
-        }).dimensions((this.width - 300) / 2, 240, 300, 20).build();
-        musicLink = new TextFieldWidget(this.textRenderer, (this.width - 300) / 2, 160, 300, 20, Text.literal("link"));
+        }).dimensions((this.width - 300) / 2, this.height / 4 + 110, 300, 20).build();
+        musicLink = new TextFieldWidget(this.textRenderer, (this.width - 300) / 2, this.height / 4 + 60, 300, 20, Text.literal("link"));
         musicLink.setMaxLength(128);
         musicLink.setChangedListener(s -> {
             youtubeLink = s;
@@ -53,7 +53,7 @@ public class BoomboxScreen extends Screen {
 
         addDrawableChild(confirm);
         addDrawableChild(musicLink);
-        addDrawableChild(boomboxVolume.createWidget(this.client.options, (this.width - 300) / 2, 80, 300));
+        addDrawableChild(boomboxVolume.createWidget(this.client.options, (this.width - 300) / 2, this.height / 4 + 10, 300));
     }
 
     @Override

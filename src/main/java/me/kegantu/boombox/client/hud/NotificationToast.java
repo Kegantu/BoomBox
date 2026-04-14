@@ -18,7 +18,6 @@ import net.minecraft.util.math.RotationAxis;
 public class NotificationToast implements Toast {
 
     private final Identifier NOTIFICATIONS_TEXTURE = new Identifier(BoomBox.MOD_ID, "textures/gui/notifications40v3.png");
-    //private final Identifier MUSIC_DISC_TEXTURE = new Identifier(BoomBox.MOD_ID, "textures/gui/musicdisc.png");
     private final String soundtrackName;
     private float rotation;
 
