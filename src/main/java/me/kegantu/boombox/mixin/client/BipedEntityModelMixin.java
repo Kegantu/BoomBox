@@ -23,6 +23,8 @@ public abstract class BipedEntityModelMixin <T extends LivingEntity> extends Ani
 
     @Shadow @Final public ModelPart leftArm;
 
+    @Shadow public boolean sneaking;
+
     @Inject(method = "positionLeftArm", at = @At("HEAD"), cancellable = true)
     private void positionLeftArm(T entity, CallbackInfo ci){
         if (!(entity instanceof PlayerEntity player)){
@@ -41,6 +43,12 @@ public abstract class BipedEntityModelMixin <T extends LivingEntity> extends Ani
         this.leftArm.pitch = 0;
         this.leftArm.yaw = 0;
         this.leftArm.roll = (float) Math.PI + 0.6f;
+
+        if(this.sneaking){
+            this.leftArm.pitch -= 1.0F;
+            this.leftArm.pivotY = 5.2F;
+        }
+
         ci.cancel();
     }
 
@@ -62,6 +70,12 @@ public abstract class BipedEntityModelMixin <T extends LivingEntity> extends Ani
         this.rightArm.pitch = 0;
         this.rightArm.yaw = 0;
         this.rightArm.roll = 2.5f;
+
+        if(this.sneaking){
+            this.rightArm.pitch -= 1.0F;
+            this.rightArm.pivotY = 5.2F;
+        }
+
         ci.cancel();
     }
 }
