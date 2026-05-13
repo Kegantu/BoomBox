@@ -4,6 +4,7 @@ import me.kegantu.boombox.BoomBox;
 import me.kegantu.boombox.client.hud.NotificationToast;
 import me.kegantu.boombox.entity.BoomBoxEntity;
 import me.kegantu.boombox.soundsystem.MusicManager;
+import me.kegantu.boombox.soundsystem.ServerMusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
 import me.kegantu.boombox.utils.AudioDownloader;
 import me.kegantu.boombox.utils.YoutubeUtils;
@@ -15,8 +16,10 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
+import oshi.util.tuples.Triplet;
 
 import java.nio.file.Path;
 import java.util.UUID;
@@ -25,6 +28,7 @@ import java.util.concurrent.CompletableFuture;
 public class ModPackets {
 
     public static final Identifier BOOMBOX_PLAY_S2C = new Identifier(BoomBox.MOD_ID, "boombox_play_client");
+    public static final Identifier BOOMBOX_ON_JOIN_SYNC_S2C = new Identifier(BoomBox.MOD_ID, "boombox_on_join_sync_client");
     public static final Identifier BOOMBOX_STOP_S2C = new Identifier(BoomBox.MOD_ID, "boombox_stop_client");
     public static final Identifier SOUND_POSITION_UPDATE_S2C = new Identifier(BoomBox.MOD_ID, "sound_position_update_client");
 
@@ -36,9 +40,13 @@ public class ModPackets {
         ServerPlayNetworking.registerGlobalReceiver(BOOMBOX_PLAY_C2S,
                 (server, player, handler, buf, responseSender) ->{
                     PacketByteBuf bufClient = PacketByteBufs.create();
-                    bufClient.writeString(buf.readString());
-                    bufClient.writeFloat(buf.readFloat());
-                    bufClient.writeVector3f(buf.readVector3f());
+                    String url = buf.readString();
+                    float volume = buf.readFloat();
+                    Vector3f soundPos = buf.readVector3f();
+
+                    bufClient.writeString(url);
+                    bufClient.writeFloat(volume);
+                    bufClient.writeVector3f(soundPos);
                     String musicUUID = buf.readString();
                     int entityId = buf.readInt();
                     BoomBoxEntity entity = (BoomBoxEntity) player.getWorld().getEntityById(entityId);
@@ -47,6 +55,8 @@ public class ModPackets {
                     bufClient.writeInt(entityId);
                     bufClient.writeUuid(buf.readUuid());
                     BoomBox.LOGGER.info(musicUUID + " server play");
+
+                    ServerMusicManager.addMusicURL(musicUUID, new Triplet<>(url, soundPos, volume));
 
                     for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()){
                         ServerPlayNetworking.send(playerEntity, BOOMBOX_PLAY_S2C, bufClient);
@@ -88,13 +98,13 @@ public class ModPackets {
 
             CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink, uuid));
             futureFfmpeg.whenComplete((path, exception) -> {
-                if (exception != null && client.player.squaredDistanceTo(new Vec3d(position.toVector3f())) <= 16 * 16 && client.player.getUuid() == musicOwner) {
+                if (exception != null && client.player.squaredDistanceTo(position) <= 16 * 16 && client.player.getUuid() == musicOwner) {
                     client.player.sendMessage(Text.literal("Failed To Download an Audio").formatted(Formatting.RED), true);
                     return;
                 }
 
                 playMusic(path, volume, position, UUID.fromString(uuid));
-                if (client.player.squaredDistanceTo(new Vec3d(position.toVector3f())) <= 16 * 16){
+                if (client.player.squaredDistanceTo(position) <= 16 * 16){
                     client.getToastManager().add(new NotificationToast(YoutubeUtils.getTitle(youtubeLink)));
                 }
             });
@@ -121,6 +131,16 @@ public class ModPackets {
             }
 
             MusicManager.getSound(musicUUID).setPosition(position);
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(BOOMBOX_ON_JOIN_SYNC_S2C, (client, handler, buf, responseSender) -> {
+            String youtubeLink = buf.readString();
+            float volume = buf.readFloat();
+            Vec3d position = new Vec3d(buf.readVector3f());
+            String uuid = buf.readString();
+
+            CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink, uuid));
+            futureFfmpeg.thenAccept(path -> playMusic(path, volume, position, UUID.fromString(uuid)));
         });
     }
 

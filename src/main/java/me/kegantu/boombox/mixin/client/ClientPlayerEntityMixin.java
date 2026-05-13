@@ -23,6 +23,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         ItemStack stack = this.getMainHandStack();
         if (stack.isOf(ModItems.BOOMBOX) && stack.getSubNbt("MusicUUID") != null){
             cir.cancel();
+            //g
         }
     }
 }
