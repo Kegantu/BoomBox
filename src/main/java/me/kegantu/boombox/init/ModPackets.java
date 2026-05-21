@@ -70,6 +70,8 @@ public class ModPackets {
                     bufClient.writeString(uuid);
                     BoomBox.LOGGER.info(uuid + " server stop");
 
+                    ServerMusicManager.remove(uuid);
+
                     for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()){
                         ServerPlayNetworking.send(playerEntity, BOOMBOX_STOP_S2C, bufClient);
                     }
@@ -138,14 +140,20 @@ public class ModPackets {
             float volume = buf.readFloat();
             Vec3d position = new Vec3d(buf.readVector3f());
             String uuid = buf.readString();
+            float playback = buf.readFloat();
 
             CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink, uuid));
-            futureFfmpeg.thenAccept(path -> playMusic(path, volume, position, UUID.fromString(uuid)));
+            futureFfmpeg.thenAccept(path -> playMusic(path, volume, position, UUID.fromString(uuid), playback));
         });
     }
 
     private static void playMusic(Path output, float volume, Vec3d position, UUID uuid){
         Sound music = new Sound(output, position, volume, uuid);
+        music.play();
+    }
+
+    private static void playMusic(Path output, float volume, Vec3d position, UUID uuid, float playback){
+        Sound music = new Sound(output, position, volume, uuid, playback);
         music.play();
     }
 }

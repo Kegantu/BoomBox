@@ -29,6 +29,16 @@ public class FFmpegDownloader {
         }
 
         FFMPEG_LOCATION = FabricLoader.getInstance().getGameDir() + "\\music\\ffmpeg\\" + FFMPEG_FILE;
+        var FFMPEG_CHECK = new File(FabricLoader.getInstance().getGameDir() + "\\music\\ffmpeg\\");
+
+        if (!FFMPEG_CHECK.exists()){
+            try {
+                Files.createDirectory(Path.of(FabricLoader.getInstance().getGameDir() + "\\music\\ffmpeg"));
+            } catch (Exception ignored) {
+
+            }
+        }
+
         OUTPUT_ZIP = new File(FabricLoader.getInstance().getGameDir() + "\\music\\ffmpeg\\" + REPOSITORY_FILE);
 
         if (!OUTPUT_ZIP.exists()){

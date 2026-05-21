@@ -81,7 +81,7 @@ public class BoomBoxItem extends Item {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeVector3f(serverPlayerEntity.getPos().toVector3f());
             buf.writeString(stack.getSubNbt("MusicUUID").getString("UUID"));
-            ServerPlayNetworking.send(serverPlayerEntity, ModPackets.SOUND_POSITION_UPDATE_S2C, buf);
+            ServerPlayNetworking.send(serverPlayerEntity, ModPackets.SOUND_POSITION_UPDATE_C2S, buf);
         }
     }
 }

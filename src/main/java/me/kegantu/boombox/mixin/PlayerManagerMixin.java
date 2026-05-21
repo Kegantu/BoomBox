@@ -1,6 +1,7 @@
 package me.kegantu.boombox.mixin;
 
 import me.kegantu.boombox.init.ModPackets;
+import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.ServerMusicManager;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -31,6 +32,7 @@ public abstract class PlayerManagerMixin {
             buf.writeFloat(musicInfo.getC());
             buf.writeVector3f(musicInfo.getB());
             buf.writeString(musicUUID);
+            buf.writeFloat(MusicManager.getSound(musicUUID).getPlayback());
             ServerPlayNetworking.send(player, ModPackets.BOOMBOX_ON_JOIN_SYNC_S2C, buf);
         }
     }
