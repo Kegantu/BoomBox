@@ -77,11 +77,11 @@ public class BoomBoxItem extends Item {
 
         if (!world.isClient()){
             ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity) playerEntity;
-
-            PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeVector3f(serverPlayerEntity.getPos().toVector3f());
-            buf.writeString(stack.getSubNbt("MusicUUID").getString("UUID"));
-            ServerPlayNetworking.send(serverPlayerEntity, ModPackets.SOUND_POSITION_UPDATE_C2S, buf);
         }
+
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeVector3f(playerEntity.getPos().toVector3f());
+        buf.writeString(stack.getSubNbt("MusicUUID").getString("UUID"));
+        ClientPlayNetworking.send(ModPackets.SOUND_POSITION_UPDATE_C2S, buf);
     }
 }
