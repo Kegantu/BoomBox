@@ -40,6 +40,10 @@ public abstract class HeldItemFeatureRendererMixin<T extends LivingEntity, M ext
             return;
         }
 
+        if (transformationMode.isFirstPerson()){
+            return;
+        }
+
         matrices.push();
         this.getContextModel().setArmAngle(arm, matrices);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90.0F));
