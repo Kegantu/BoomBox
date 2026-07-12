@@ -214,8 +214,11 @@ public class BoomBoxEntity extends Entity {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeString(this.dataTracker.get(MUSIC_UUID).get().toString());
             ClientPlayNetworking.send(ModPackets.BOOMBOX_STOP_C2S, buf);
-            MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()).stop();
-            MusicManager.remove(this.dataTracker.get(MUSIC_UUID).get().toString());
+
+            if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()) == null){
+                MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()).stop();
+                MusicManager.remove(this.dataTracker.get(MUSIC_UUID).get().toString());
+            }
         }
 
         PacketByteBuf buf = PacketByteBufs.create();

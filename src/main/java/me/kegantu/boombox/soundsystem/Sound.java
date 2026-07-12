@@ -62,7 +62,7 @@ public class Sound {
         BoomBox.LOGGER.info(AL10.alGetError() + " assignBuffer");
 
         AL10.alSourcei(soundSourceID, AL10.AL_DISTANCE_MODEL, EXTLinearDistance.AL_LINEAR_DISTANCE);
-        AL10.alSourcef(soundSourceID, AL10.AL_MAX_DISTANCE, 16);
+        AL10.alSourcef(soundSourceID, AL10.AL_MAX_DISTANCE, 32);
         AL10.alSourcef(soundSourceID, AL10.AL_ROLLOFF_FACTOR, 1.0F);
         AL10.alSourcef(soundSourceID, AL10.AL_REFERENCE_DISTANCE, 0.0F);
         BoomBox.LOGGER.info(AL10.alGetError() + " 3d sound");

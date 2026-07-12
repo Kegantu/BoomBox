@@ -3,6 +3,7 @@ package me.kegantu.boombox.mixin;
 import me.kegantu.boombox.init.ModPackets;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.ServerMusicManager;
+import me.kegantu.boombox.soundsystem.Sound;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -26,13 +27,16 @@ public abstract class PlayerManagerMixin {
     private void loadMusicOnJoin(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci){
         for (String musicUUID : ServerMusicManager.getCurrentlyPlayingMusicServerKeys()){
             Triplet<String, Vector3f, Float> musicInfo = ServerMusicManager.getMusicServerInfo(musicUUID);
+            String url = musicInfo.getA();
+            float volume = musicInfo.getC();
+            Vector3f position = musicInfo.getB();
 
             PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeString(musicInfo.getA());
-            buf.writeFloat(musicInfo.getC());
-            buf.writeVector3f(musicInfo.getB());
+            buf.writeString(url);
+            buf.writeFloat(volume);
+            buf.writeVector3f(position);
             buf.writeString(musicUUID);
-            buf.writeFloat(MusicManager.getSound(musicUUID).getPlayback());
+            buf.writeFloat(MusicManager.getSound(musicUUID) == null ? 0 : MusicManager.getSound(musicUUID).getPlayback());
             ServerPlayNetworking.send(player, ModPackets.BOOMBOX_ON_JOIN_SYNC_S2C, buf);
         }
     }

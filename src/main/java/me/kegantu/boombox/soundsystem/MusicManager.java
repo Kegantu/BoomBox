@@ -25,4 +25,8 @@ public class MusicManager {
     public static Sound getSound(String key){
         return CURRENTLY_PLAYING_MUSIC.get(key);
     }
+
+    public static void clearSounds(){
+        CURRENTLY_PLAYING_MUSIC.clear();
+    }
 }

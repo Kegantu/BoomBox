@@ -52,4 +52,9 @@ public class MinecraftClientMixin {
     private void onQuitGame(CallbackInfo ci){
         AudioDownloader.cleanAllSaveDirectory();
     }
+
+    @Inject(method = "disconnect()V", at = @At("TAIL"))
+    private void onDisconnect(CallbackInfo ci){
+        MusicManager.clearSounds();
+    }
 }
