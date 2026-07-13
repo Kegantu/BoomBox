@@ -41,6 +41,7 @@ import java.util.concurrent.CompletableFuture;
 public class BoomBoxEntity extends Entity {
 
     private static final TrackedData<Optional<UUID>> MUSIC_UUID = DataTracker.registerData(BoomBoxEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
+    private static final TrackedData<Float> VOLUME = DataTracker.registerData(BoomBoxEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static Sound MUSIC;
     private int timePassed;
 
@@ -68,16 +69,17 @@ public class BoomBoxEntity extends Entity {
     @Override
     protected void initDataTracker() {
         this.dataTracker.startTracking(MUSIC_UUID, Optional.empty());
+        this.dataTracker.startTracking(VOLUME, 1f);
     }
 
     @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
-
+        this.dataTracker.set(VOLUME, nbt.getFloat("Volume"));
     }
 
     @Override
     protected void writeCustomDataToNbt(NbtCompound nbt) {
-
+        nbt.putFloat("Volume", this.dataTracker.get(VOLUME));
     }
 
     @Override
@@ -223,7 +225,7 @@ public class BoomBoxEntity extends Entity {
 
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeString(youtubeLink);
-        buf.writeFloat((float) volume);
+        buf.writeFloat(this.dataTracker.get(VOLUME));
         buf.writeVector3f(new Vector3f((float) this.getX(), (float) this.getY(), (float) this.getZ()));
         buf.writeString(UUID.randomUUID().toString());
         buf.writeInt(this.getId());
@@ -234,6 +236,32 @@ public class BoomBoxEntity extends Entity {
 
     public void setMusicUUID(UUID uuid){
         this.dataTracker.set(MUSIC_UUID, Optional.of(uuid));
+    }
+
+    public void setVolumeClient(float volume){
+        this.dataTracker.set(VOLUME, volume);
+
+        if (this.dataTracker.get(MUSIC_UUID).isEmpty()){
+            return;
+        }
+
+        if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()) == null){
+            return;
+        }
+
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeFloat(volume);
+        buf.writeInt(this.getId());
+        buf.writeUuid(this.dataTracker.get(MUSIC_UUID).get());
+        ClientPlayNetworking.send(ModPackets.UPDATE_VOLUME_C2S, buf);
+    }
+
+    public void setVolumeServer(float volume){
+        this.dataTracker.set(VOLUME, volume);
+    }
+
+    public float getVolume(){
+        return this.dataTracker.get(VOLUME);
     }
 
     public boolean isPlaying(){

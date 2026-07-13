@@ -31,10 +31,12 @@ public class ModPackets {
     public static final Identifier BOOMBOX_ON_JOIN_SYNC_S2C = new Identifier(BoomBox.MOD_ID, "boombox_on_join_sync_client");
     public static final Identifier BOOMBOX_STOP_S2C = new Identifier(BoomBox.MOD_ID, "boombox_stop_client");
     public static final Identifier SOUND_POSITION_UPDATE_S2C = new Identifier(BoomBox.MOD_ID, "sound_position_update_client");
+    public static final Identifier UPDATE_VOLUME_S2C = new Identifier(BoomBox.MOD_ID, "update_volume_client");
 
     public static final Identifier BOOMBOX_PLAY_C2S = new Identifier(BoomBox.MOD_ID, "boombox_play_server");
     public static final Identifier BOOMBOX_STOP_C2S = new Identifier(BoomBox.MOD_ID, "boombox_stop_server");
     public static final Identifier SOUND_POSITION_UPDATE_C2S = new Identifier(BoomBox.MOD_ID, "sound_position_update_server");
+    public static final Identifier UPDATE_VOLUME_C2S = new Identifier(BoomBox.MOD_ID, "update_volume_server");
 
     public static void registerC2SPackets(){
         ServerPlayNetworking.registerGlobalReceiver(BOOMBOX_PLAY_C2S,
@@ -87,6 +89,21 @@ public class ModPackets {
                         ServerPlayNetworking.send(playerEntity, SOUND_POSITION_UPDATE_S2C, bufClient);
                     }
                 });
+
+        ServerPlayNetworking.registerGlobalReceiver(UPDATE_VOLUME_C2S,
+                (server, player, handler, buf, responseSender) -> {
+                    PacketByteBuf bufClient = PacketByteBufs.create();
+                    float volume = buf.readFloat();
+                    int entityId = buf.readInt();
+                    bufClient.writeFloat(volume);
+                    bufClient.writeUuid(buf.readUuid());
+
+                    BoomBoxEntity entity = (BoomBoxEntity) player.getWorld().getEntityById(entityId);
+                    entity.setVolumeServer(volume);
+                    for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()){
+                        ServerPlayNetworking.send(playerEntity, UPDATE_VOLUME_S2C, bufClient);
+                    }
+        });
     }
 
     public static void registerS2CPackets(){
@@ -144,6 +161,18 @@ public class ModPackets {
 
             CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink, uuid));
             futureFfmpeg.thenAccept(path -> playMusic(path, volume, position, UUID.fromString(uuid), playback));
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(UPDATE_VOLUME_S2C, (client, handler, buf, responseSender) -> {
+            float volume = buf.readFloat();
+            UUID musicUUID = buf.readUuid();
+
+            if (MusicManager.getSound(musicUUID.toString()) == null){
+                BoomBox.LOGGER.info("ne na hod");
+                return;
+            }
+
+            MusicManager.getSound(musicUUID.toString()).setVolume(volume);
         });
     }
 

@@ -112,4 +112,10 @@ public class Sound {
     public boolean isPlaying(){
         return AL10.alGetSourcei(soundSourceID, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING;
     }
+
+    public void setVolume(float volume){
+        this.volume = volume;
+        BoomBox.LOGGER.info(String.valueOf(volume));
+        AL10.alSourcef(soundSourceID, AL10.AL_GAIN, this.volume);
+    }
 }

@@ -25,6 +25,10 @@ public abstract class PlayerManagerMixin {
 
     @Inject(method = "onPlayerConnect", at = @At("TAIL"))
     private void loadMusicOnJoin(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci){
+        if (player.getWorld().isClient()){
+            return;
+        }
+
         for (String musicUUID : ServerMusicManager.getCurrentlyPlayingMusicServerKeys()){
             Triplet<String, Vector3f, Float> musicInfo = ServerMusicManager.getMusicServerInfo(musicUUID);
             String url = musicInfo.getA();

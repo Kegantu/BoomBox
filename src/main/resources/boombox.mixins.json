@@ -8,7 +8,8 @@
 		"ChestBlockMixin",
 		"ScreenHandlerMixin",
 		"ItemEntityMixin",
-		"PlayerManagerMixin"
+		"PlayerManagerMixin",
+		"MinecraftServerMixin"
 	],
 	"client": [
 		"client.MinecraftClientMixin",

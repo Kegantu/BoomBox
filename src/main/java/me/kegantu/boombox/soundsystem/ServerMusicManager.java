@@ -29,4 +29,8 @@ public class ServerMusicManager {
     public static Triplet<String, Vector3f, Float> getMusicServerInfo(String key){
         return CURRENTLY_PLAYING_MUSIC_SERVER.get(key);
     }
+
+    public static void clearServerSounds(){
+        CURRENTLY_PLAYING_MUSIC_SERVER.clear();
+    }
 }

@@ -2,14 +2,18 @@ package me.kegantu.boombox.client.screen;
 
 import me.kegantu.boombox.BoomBox;
 import me.kegantu.boombox.entity.BoomBoxEntity;
+import me.kegantu.boombox.init.ModPackets;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.option.SimpleOption;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -42,7 +46,7 @@ public class BoomboxScreen extends Screen {
             this.client.player.sendMessage(Text.literal("Downloading an audio..."), true);
             this.client.setScreen(null);
         }).dimensions((this.width - 300) / 2, this.height / 4 + 110, 300, 20).build();
-        musicLink = new TextFieldWidget(this.textRenderer, (this.width - 300) / 2, this.height / 4 + 60, 300, 20, Text.literal("link"));
+        musicLink = new TextFieldWidget(this.textRenderer, (this.width - 300) / 2, this.height / 4 + 60, 300, 20, Text.literal("Paste link here"));
         musicLink.setMaxLength(128);
         musicLink.setChangedListener(s -> {
             youtubeLink = s;
@@ -54,6 +58,7 @@ public class BoomboxScreen extends Screen {
         addDrawableChild(confirm);
         addDrawableChild(musicLink);
         addDrawableChild(boomboxVolume.createWidget(this.client.options, (this.width - 300) / 2, this.height / 4 + 10, 300));
+        boomboxVolume.setValue(entity.getVolume() != 1.0 ? entity.getVolume() : 1.0d);
     }
 
     @Override
