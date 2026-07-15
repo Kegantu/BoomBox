@@ -7,6 +7,8 @@ import me.kegantu.boombox.init.ModParticles;
 import me.kegantu.boombox.utils.FFmpegDownloader;
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.item.ItemGroups;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -30,5 +32,7 @@ public class BoomBox implements ModInitializer {
 		ModPackets.registerS2CPackets();
 		ModParticles.register();
 		FFmpegDownloader.download();
+
+		ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> entries.add(ModItems.BOOMBOX));
 	}
 }

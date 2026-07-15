@@ -29,12 +29,13 @@ public class BoomBoxDataGenerator implements DataGeneratorEntrypoint {
 		@Override
 		public void generate(Consumer<RecipeJsonProvider> exporter) {
 			ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, ModItems.BOOMBOX)
-					.pattern("   ")
 					.pattern(" r ")
 					.pattern("njn")
+					.pattern("iii")
 					.input('r', Items.REDSTONE_BLOCK)
 					.input('n', Blocks.NOTE_BLOCK)
 					.input('j', Blocks.JUKEBOX)
+					.input('i', Items.IRON_INGOT)
 					.criterion(FabricRecipeProvider.hasItem(Blocks.NOTE_BLOCK.asItem()), FabricRecipeProvider.conditionsFromItem(Blocks.NOTE_BLOCK.asItem()))
 					.criterion(FabricRecipeProvider.hasItem(Blocks.JUKEBOX.asItem()), FabricRecipeProvider.conditionsFromItem(Blocks.JUKEBOX.asItem()))
 					.offerTo(exporter);

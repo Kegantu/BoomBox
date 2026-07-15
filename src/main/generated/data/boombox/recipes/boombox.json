@@ -2,6 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
+    "i": {
+      "item": "minecraft:iron_ingot"
+    },
     "j": {
       "item": "minecraft:jukebox"
     },
@@ -13,9 +16,9 @@
     }
   },
   "pattern": [
-    "   ",
     " r ",
-    "njn"
+    "njn",
+    "iii"
   ],
   "result": {
     "item": "boombox:boombox"
