@@ -21,6 +21,7 @@ import org.lwjgl.glfw.GLFW;
 @Environment(EnvType.CLIENT)
 public class BoomboxScreen extends Screen {
     private ButtonWidget confirm;
+    private ButtonWidget back;
     private TextFieldWidget musicLink;
     private SimpleOption<Double> boomboxVolume;
 
@@ -35,7 +36,7 @@ public class BoomboxScreen extends Screen {
 
     @Override
     protected void init() {
-        confirm = ButtonWidget.builder(Text.literal("Confirm"), button -> {
+        confirm = ButtonWidget.builder(Text.literal("Update Link"), button -> {
             if (youtubeLink.isEmpty()){
                 this.client.player.sendMessage(Text.literal("Please put your youtube link"), true);
                 this.client.setScreen(null);
@@ -45,7 +46,11 @@ public class BoomboxScreen extends Screen {
             entity.downloadMusic(youtubeLink, volume, client.player.getUuid());
             this.client.player.sendMessage(Text.literal("Downloading an audio..."), true);
             this.client.setScreen(null);
-        }).dimensions((this.width - 300) / 2, this.height / 4 + 110, 300, 20).build();
+        }).dimensions((this.width + 46) / 2, this.height / 4 + 110, 130, 20).build();
+        back = ButtonWidget.builder(Text.literal("Back"), button -> {
+                    this.client.setScreen(null);
+                }).dimensions((this.width - 301) / 2, this.height / 4 + 110, 130, 20).build();
+
         musicLink = new TextFieldWidget(this.textRenderer, (this.width - 300) / 2, this.height / 4 + 60, 300, 20, Text.literal("Paste link here"));
         musicLink.setMaxLength(128);
         musicLink.setChangedListener(s -> {
@@ -60,6 +65,7 @@ public class BoomboxScreen extends Screen {
         boomboxVolume.setValue(entity.getVolume() != 1.0 ? entity.getVolume() : 1.0d);
 
         addDrawableChild(confirm);
+        addDrawableChild(back);
         addDrawableChild(musicLink);
         addDrawableChild(boomboxVolume.createWidget(this.client.options, (this.width - 300) / 2, this.height / 4 + 10, 300));
     }

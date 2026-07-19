@@ -11,7 +11,7 @@ import net.minecraft.util.Rarity;
 
 public class ModItems {
 
-    public static final Item BOOMBOX = new BoomBoxItem(new FabricItemSettings().maxCount(1).rarity(Rarity.EPIC));
+    public static final Item BOOMBOX = new BoomBoxItem(new FabricItemSettings().maxCount(1).rarity(Rarity.COMMON));
 
     public static void register(){
         Registry.register(Registries.ITEM, Identifier.of(BoomBox.MOD_ID, "boombox"), BOOMBOX);
