@@ -7,6 +7,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,11 +38,13 @@ public abstract class ItemEntityMixin extends Entity {
             return;
         }
 
+        NbtCompound nbt = stack.getSubNbt("MusicUUID");
+
         if (this.getWorld().isClient) {
             return;
         }
 
-        BoomBoxEntity boomBoxEntity = new BoomBoxEntity(this.getWorld(), this.getPos(), UUID.fromString(stack.getSubNbt("MusicUUID").getString("UUID")));
+        BoomBoxEntity boomBoxEntity = new BoomBoxEntity(this.getWorld(), this.getPos(), UUID.fromString(nbt.getString("UUID")), nbt.getFloat("Volume"));
         stack.getNbt().remove("MusicUUID");
         stack.decrement(1);
         //boomBoxEntity.setYaw(this.getYaw());

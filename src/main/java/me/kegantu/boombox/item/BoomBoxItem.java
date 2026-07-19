@@ -11,6 +11,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Hand;
@@ -42,7 +43,8 @@ public class BoomBoxItem extends Item {
             }
 
             if (stack.getSubNbt("MusicUUID") != null){
-                BoomBoxEntity boomBoxEntity = new BoomBoxEntity(world, user.getPos(), UUID.fromString(stack.getSubNbt("MusicUUID").getString("UUID")));
+                NbtCompound nbt = stack.getSubNbt("MusicUUID");
+                BoomBoxEntity boomBoxEntity = new BoomBoxEntity(world, user.getPos(), UUID.fromString(nbt.getString("UUID")), nbt.getFloat("Volume"));
                 stack.getNbt().remove("MusicUUID");
                 stack.decrement(1);
                 boomBoxEntity.setYaw(user.getYaw());
@@ -63,13 +65,17 @@ public class BoomBoxItem extends Item {
             return;
         }
 
-        if (MusicManager.getSound(stack.getSubNbt("MusicUUID").getString("UUID")) == null){
+        NbtCompound nbt = stack.getSubNbt("MusicUUID");
+
+        if (MusicManager.getSound(nbt.getString("UUID")) == null){
             return;
         }
 
-        if (!MusicManager.getSound(stack.getSubNbt("MusicUUID").getString("UUID")).isPlaying()){
+        String UUID = nbt.getString("UUID");
+
+        if (!MusicManager.getSound(UUID).isPlaying()){
             PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeString(stack.getSubNbt("MusicUUID").getString("UUID"));
+            buf.writeString(UUID);
             stack.getNbt().remove("MusicUUID");
             ClientPlayNetworking.send(ModPackets.BOOMBOX_STOP_C2S, buf);
             return;
@@ -81,7 +87,7 @@ public class BoomBoxItem extends Item {
 
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeVector3f(playerEntity.getPos().toVector3f());
-        buf.writeString(stack.getSubNbt("MusicUUID").getString("UUID"));
+        buf.writeString(UUID);
         ClientPlayNetworking.send(ModPackets.SOUND_POSITION_UPDATE_C2S, buf);
     }
 }

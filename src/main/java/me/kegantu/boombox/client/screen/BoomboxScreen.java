@@ -53,12 +53,15 @@ public class BoomboxScreen extends Screen {
         });
         boomboxVolume = new SimpleOption<Double>("options.boombox.volume", SimpleOption.emptyTooltip(),
                 (optionText, value) -> value == 0.0 ? this.client.options.getGenericValueText(optionText, ScreenTexts.OFF) : this.getPercentValueText(optionText, value),
-                SimpleOption.DoubleSliderCallbacks.INSTANCE, 1d, aFloat -> volume = aFloat);
+                SimpleOption.DoubleSliderCallbacks.INSTANCE, 1d, aFloat -> {
+            volume = aFloat;
+            entity.setVolumeClient((float) volume);
+        });
+        boomboxVolume.setValue(entity.getVolume() != 1.0 ? entity.getVolume() : 1.0d);
 
         addDrawableChild(confirm);
         addDrawableChild(musicLink);
         addDrawableChild(boomboxVolume.createWidget(this.client.options, (this.width - 300) / 2, this.height / 4 + 10, 300));
-        boomboxVolume.setValue(entity.getVolume() != 1.0 ? entity.getVolume() : 1.0d);
     }
 
     @Override

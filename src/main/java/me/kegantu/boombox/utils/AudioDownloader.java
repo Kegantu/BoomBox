@@ -57,7 +57,7 @@ public class AudioDownloader {
             });
             outputReaderThread.start();
 
-            ffmpeg.waitFor(120, TimeUnit.SECONDS);
+            ffmpeg.waitFor(240, TimeUnit.SECONDS);
             outputReaderThread.join();
         } catch (Exception e) {
             throw new RuntimeException(e);

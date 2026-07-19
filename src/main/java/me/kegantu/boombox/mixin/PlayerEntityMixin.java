@@ -8,6 +8,7 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
@@ -49,13 +50,15 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 			return;
 		}
 
+		NbtCompound nbt = stack.getSubNbt("MusicUUID");
+
 		if (this.getWorld().isClient) {
 			this.swingHand(Hand.MAIN_HAND);
 			return;
 		}
 
 		BoomBox.LOGGER.info("WHAT");
-		BoomBoxEntity boomBoxEntity = new BoomBoxEntity(this.getWorld(), this.getPos(), UUID.fromString(stack.getSubNbt("MusicUUID").getString("UUID")));
+		BoomBoxEntity boomBoxEntity = new BoomBoxEntity(this.getWorld(), this.getPos(), UUID.fromString(nbt.getString("UUID")), nbt.getFloat("Volume"));
 		stack.getNbt().remove("MusicUUID");
 		stack.decrement(1);
 		boomBoxEntity.setYaw(this.getYaw());
