@@ -114,13 +114,13 @@ public class ModPackets {
 
             CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink, uuid));
             futureFfmpeg.whenComplete((path, exception) -> {
-                if (exception != null && client.player.squaredDistanceTo(position) <= 16 * 16 && client.player.getUuid() == musicOwner) {
+                if (exception != null && client.player.squaredDistanceTo(position) <= 32 * 32 && client.player.getUuid() == musicOwner) {
                     client.player.sendMessage(Text.literal("Failed To Download an Audio").formatted(Formatting.RED), true);
                     return;
                 }
 
                 playMusic(path, volume, position, UUID.fromString(uuid));
-                if (client.player.squaredDistanceTo(position) <= 16 * 16){
+                if (client.player.squaredDistanceTo(position) <= 32 * 32){
                     client.getToastManager().add(new NotificationToast(YoutubeUtils.getTitle(youtubeLink)));
                 }
             });
