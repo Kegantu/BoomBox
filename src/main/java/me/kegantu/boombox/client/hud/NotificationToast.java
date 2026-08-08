@@ -28,7 +28,7 @@ public class NotificationToast implements Toast {
     @Override
     public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
         MatrixStack stack = context.getMatrices();
-        rotation += 0.5f;
+        rotation += 0.5f * MinecraftClient.getInstance().getTickDelta();
         if (rotation >= 360f){
             rotation = 0;
         }
