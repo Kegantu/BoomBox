@@ -31,7 +31,7 @@ public class Sound {
 
         ShortBuffer pcmShortBuffer = STBVorbis.stb_vorbis_decode_filename(soundPath.toString(), channelsBuffer, sampleRateBuffer);
         if (pcmShortBuffer == null) {
-            System.out.println("could not load sound " + soundPath);
+            BoomBox.LOGGER.info("Could not load sound " + soundPath);
             MemoryStack.stackPop();
             MemoryStack.stackPop();
             return;
@@ -51,29 +51,21 @@ public class Sound {
         MemoryStack.stackPop();
 
         soundBufferID = AL10.alGenBuffers();
-        BoomBox.LOGGER.info(String.valueOf(AL10.alGetError()));
         AL10.alBufferData(soundBufferID, AL10.AL_FORMAT_MONO16, mono, sampleRate);
-        BoomBox.LOGGER.info(AL10.alGetError() + " bufferData");
 
         soundSourceID = AL10.alGenSources();
-        BoomBox.LOGGER.info(AL10.alGetError() + " genSources");
 
         AL10.alSourcei(soundSourceID, AL10.AL_BUFFER, soundBufferID);
-        BoomBox.LOGGER.info(AL10.alGetError() + " assignBuffer");
 
         AL10.alSourcei(soundSourceID, AL10.AL_DISTANCE_MODEL, EXTLinearDistance.AL_LINEAR_DISTANCE);
         AL10.alSourcef(soundSourceID, AL10.AL_MAX_DISTANCE, 32);
         AL10.alSourcef(soundSourceID, AL10.AL_ROLLOFF_FACTOR, 1.0F);
         AL10.alSourcef(soundSourceID, AL10.AL_REFERENCE_DISTANCE, 0.0F);
-        BoomBox.LOGGER.info(AL10.alGetError() + " 3d sound");
 
         AL10.alSource3f(soundSourceID, AL10.AL_POSITION, (float) position.x, (float) position.y, (float) position.z);
         AL10.alSource3f(soundSourceID, AL10.AL_VELOCITY, 0f, 0f, 0f);
         AL10.alSourcef(soundSourceID, AL10.AL_PITCH, 1f);
         AL10.alSourcef(soundSourceID, AL10.AL_GAIN, this.volume);
-        BoomBox.LOGGER.info(String.valueOf(volume));
-        BoomBox.LOGGER.info(String.valueOf(position));
-        BoomBox.LOGGER.info(AL10.alGetError() + " default settings");
     }
 
     public Sound(Path soundPath, Vec3d position, double volume, UUID uuid, float playback){
@@ -115,7 +107,6 @@ public class Sound {
 
     public void setVolume(float volume){
         this.volume = volume;
-        BoomBox.LOGGER.info(String.valueOf(volume));
         AL10.alSourcef(soundSourceID, AL10.AL_GAIN, this.volume);
     }
 }

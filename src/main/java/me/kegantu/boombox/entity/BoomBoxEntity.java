@@ -218,13 +218,7 @@ public class BoomBoxEntity extends Entity {
 
     public void downloadMusic(String youtubeLink, double volume, UUID musicOwner){
 
-        if (this.dataTracker.get(MUSIC_UUID).isEmpty()){
-            BoomBox.LOGGER.info("MUSIC_UUID IS EMPTY");
-        }
-
         if (this.dataTracker.get(MUSIC_UUID).isPresent()){
-            BoomBox.LOGGER.info(this.dataTracker.get(MUSIC_UUID).get() + " downloadMusic id client");
-
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeString(this.dataTracker.get(MUSIC_UUID).get().toString());
             ClientPlayNetworking.send(ModPackets.BOOMBOX_STOP_C2S, buf);

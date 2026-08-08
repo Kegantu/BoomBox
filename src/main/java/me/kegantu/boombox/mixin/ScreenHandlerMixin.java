@@ -48,9 +48,6 @@ public abstract class ScreenHandlerMixin {
             return;
         }
 
-        BoomBox.LOGGER.info(String.valueOf(slotIndex));
-        BoomBox.LOGGER.info(String.valueOf(slots.size()));
-
         if (slotIndex > slots.size() - 37){
             return;
         }

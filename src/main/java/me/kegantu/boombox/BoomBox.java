@@ -19,11 +19,6 @@ public class BoomBox implements ModInitializer {
 	public static final String MOD_ID = "boombox";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	public static final Identifier TEST_IDENTIFIER = new Identifier(MOD_ID, "test");
-	public static final SoundEvent TEST = SoundEvent.of(TEST_IDENTIFIER);
-
-	public static BlockPos lastUsedChestBlockPos;
-
 	@Override
 	public void onInitialize() {
 		ModItems.register();

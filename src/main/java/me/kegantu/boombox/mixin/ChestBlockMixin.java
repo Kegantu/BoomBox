@@ -16,6 +16,6 @@ public abstract class ChestBlockMixin {
 
     @Inject(method = "createScreenHandlerFactory", at = @At("HEAD"))
     private void createChestScreenHandlerFactory(BlockState state, World world, BlockPos pos, CallbackInfoReturnable<NamedScreenHandlerFactory> cir){
-        BoomBox.lastUsedChestBlockPos = pos;
+        //BoomBox.lastUsedChestBlockPos = pos;
     }
 }

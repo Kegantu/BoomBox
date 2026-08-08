@@ -35,18 +35,16 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
 	@Inject(method = "closeHandledScreen", at = @At("HEAD"))
 	private void resetLastUsedChestBlockPos(CallbackInfo ci){
-		BoomBox.lastUsedChestBlockPos = null;
+		//BoomBox.lastUsedChestBlockPos = null;
 	}
 
 	@Inject(method = "dropItem(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/ItemEntity;", at = @At("HEAD"), cancellable = true)
 	private void dropBoombox(ItemStack stack, boolean throwRandomly, boolean retainOwnership, CallbackInfoReturnable<ItemEntity> cir){
 		if (!stack.isOf(ModItems.BOOMBOX)){
-			BoomBox.LOGGER.info("CH");
 			return;
 		}
 
 		if (stack.getSubNbt("MusicUUID") == null){
-			BoomBox.LOGGER.info("CHO");
 			return;
 		}
 
@@ -57,7 +55,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 			return;
 		}
 
-		BoomBox.LOGGER.info("WHAT");
 		BoomBoxEntity boomBoxEntity = new BoomBoxEntity(this.getWorld(), this.getPos(), UUID.fromString(nbt.getString("UUID")), nbt.getFloat("Volume"));
 		stack.getNbt().remove("MusicUUID");
 		stack.decrement(1);

@@ -56,7 +56,6 @@ public class ModPackets {
                     bufClient.writeString(musicUUID);
                     bufClient.writeInt(entityId);
                     bufClient.writeUuid(buf.readUuid());
-                    BoomBox.LOGGER.info(musicUUID + " server play");
 
                     ServerMusicManager.addMusicURL(musicUUID, new Triplet<>(url, soundPos, volume));
 
@@ -70,7 +69,6 @@ public class ModPackets {
                     PacketByteBuf bufClient = PacketByteBufs.create();
                     String uuid = buf.readString();
                     bufClient.writeString(uuid);
-                    BoomBox.LOGGER.info(uuid + " server stop");
 
                     ServerMusicManager.remove(uuid);
 
@@ -113,7 +111,6 @@ public class ModPackets {
             Vec3d position = new Vec3d(buf.readVector3f());
             String uuid = buf.readString();
             UUID musicOwner = buf.readUuid();
-            BoomBox.LOGGER.info(uuid + " client play");
 
             CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink, uuid));
             futureFfmpeg.whenComplete((path, exception) -> {
@@ -132,7 +129,6 @@ public class ModPackets {
 
         ClientPlayNetworking.registerGlobalReceiver(BOOMBOX_STOP_S2C, (client, handler, buf, responseSender) -> {
             String musicUUID = buf.readString();
-            BoomBox.LOGGER.info(musicUUID + " client stop");
 
             if (MusicManager.getSound(musicUUID) != null){
                 MusicManager.getSound(musicUUID).stop();
@@ -145,7 +141,6 @@ public class ModPackets {
             String musicUUID = buf.readString();
 
             if (MusicManager.getSound(musicUUID) == null){
-                BoomBox.LOGGER.info("ne na hod");
                 return;
             }
 
@@ -168,7 +163,6 @@ public class ModPackets {
             UUID musicUUID = buf.readUuid();
 
             if (MusicManager.getSound(musicUUID.toString()) == null){
-                BoomBox.LOGGER.info("ne na hod");
                 return;
             }
 
