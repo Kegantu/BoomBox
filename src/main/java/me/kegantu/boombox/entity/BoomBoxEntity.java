@@ -78,9 +78,9 @@ public class BoomBoxEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker() {
-        this.dataTracker.startTracking(MUSIC_UUID, Optional.empty());
-        this.dataTracker.startTracking(VOLUME, 1f);
+    protected void initDataTracker(DataTracker.Builder builder) {
+        builder.add(MUSIC_UUID, Optional.empty());
+        builder.add(VOLUME, 1f);
     }
 
     @Override

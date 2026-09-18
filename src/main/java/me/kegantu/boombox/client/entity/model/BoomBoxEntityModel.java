@@ -31,7 +31,7 @@ public class BoomBoxEntityModel extends EntityModel<BoomBoxEntity> {
 	public void setAngles(BoomBoxEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 	}
 	@Override
-	public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-		root.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+	public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+		root.render(matrices, vertexConsumer, light, overlay, color);
 	}
 }

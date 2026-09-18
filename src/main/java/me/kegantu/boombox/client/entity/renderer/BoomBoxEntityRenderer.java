@@ -32,7 +32,7 @@ public class BoomBoxEntityRenderer extends EntityRenderer<BoomBoxEntity> {
         matrices.translate(0f, -1.5f,0f);
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(MathHelper.lerp(tickDelta, entity.prevYaw, entity.getYaw())));
         this.model.setAngles(entity, 0f, 0f, 0f, 0, 0);
-        this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(this.getTexture(entity))), light, OverlayTexture.DEFAULT_UV, 1.0f, 1.0f, 1.0f, 1.0f);
+        this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(this.getTexture(entity))), light, OverlayTexture.DEFAULT_UV);
         matrices.pop();
     }
 

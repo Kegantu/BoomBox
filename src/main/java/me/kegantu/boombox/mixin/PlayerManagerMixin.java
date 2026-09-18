@@ -11,6 +11,7 @@ import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
 import net.minecraft.server.PlayerManager;
+import net.minecraft.server.network.ConnectedClientData;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3f;
@@ -24,7 +25,7 @@ import oshi.util.tuples.Triplet;
 public abstract class PlayerManagerMixin {
 
     @Inject(method = "onPlayerConnect", at = @At("TAIL"))
-    private void loadMusicOnJoin(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci){
+    private void loadMusicOnJoin(ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci){
         if (player.getWorld().isClient()){
             return;
         }
