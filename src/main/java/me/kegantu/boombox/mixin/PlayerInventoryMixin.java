@@ -6,7 +6,6 @@ import me.kegantu.boombox.init.ModComponents;
 import me.kegantu.boombox.init.ModItems;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryWrapper;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,12 +26,11 @@ public abstract class PlayerInventoryMixin {
 
         ItemStack boomboxStack = stack.get();
 
-        if (boomboxStack.get(ModComponents.MUSIC_UUID) == null){
+        if (boomboxStack.get(ModComponents.BOOMBOX_COMPONENT) == null){
             return stack;
         }
 
-        boomboxStack.set(ModComponents.MUSIC_UUID, null);
-        boomboxStack.set(ModComponents.VOLUME, null);
+        boomboxStack.set(ModComponents.BOOMBOX_COMPONENT, null);
         return stack;
     }
 }

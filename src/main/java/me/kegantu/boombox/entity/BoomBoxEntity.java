@@ -1,11 +1,10 @@
 package me.kegantu.boombox.entity;
 
-import me.kegantu.boombox.BoomBox;
 import me.kegantu.boombox.client.screen.BoomboxScreen;
 import me.kegantu.boombox.init.*;
+import me.kegantu.boombox.item.components.BoomboxComponentDataType;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
-import me.kegantu.boombox.utils.AudioDownloader;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
@@ -30,10 +29,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.joml.Vector3f;
 
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class BoomBoxEntity extends Entity {
 
@@ -178,8 +175,7 @@ public class BoomBoxEntity extends Entity {
             if (!player.isSneaking()){
                 ItemStack itemStack = new ItemStack(ModItems.BOOMBOX);
                 if (this.dataTracker.get(MUSIC_UUID).isPresent()){
-                    itemStack.set(ModComponents.MUSIC_UUID, this.dataTracker.get(MUSIC_UUID).get().toString());
-                    itemStack.set(ModComponents.VOLUME, this.dataTracker.get(VOLUME));
+                    itemStack.set(ModComponents.BOOMBOX_COMPONENT, new BoomboxComponentDataType(this.dataTracker.get(MUSIC_UUID).get().toString(), this.dataTracker.get(VOLUME)));
                 }
                 Item item = itemStack.getItem();
                 int i = itemStack.getCount();
