@@ -2,6 +2,7 @@ package me.kegantu.boombox.mixin;
 
 import me.kegantu.boombox.BoomBox;
 import me.kegantu.boombox.entity.BoomBoxEntity;
+import me.kegantu.boombox.init.ModComponents;
 import me.kegantu.boombox.init.ModItems;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
@@ -44,19 +45,20 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 			return;
 		}
 
-		if (stack.getSubNbt("MusicUUID") == null){
+		if (stack.get(ModComponents.MUSIC_UUID) == null){
 			return;
 		}
 
-		NbtCompound nbt = stack.getSubNbt("MusicUUID");
+		String musicUUID = stack.get(ModComponents.MUSIC_UUID);
 
 		if (this.getWorld().isClient) {
 			this.swingHand(Hand.MAIN_HAND);
 			return;
 		}
 
-		BoomBoxEntity boomBoxEntity = new BoomBoxEntity(this.getWorld(), this.getPos(), UUID.fromString(nbt.getString("UUID")), nbt.getFloat("Volume"));
-		stack.getNbt().remove("MusicUUID");
+		BoomBoxEntity boomBoxEntity = new BoomBoxEntity(this.getWorld(), this.getPos(), UUID.fromString(musicUUID), stack.get(ModComponents.VOLUME));
+		stack.set(ModComponents.MUSIC_UUID, null);
+		stack.set(ModComponents.VOLUME, null);
 		stack.decrement(1);
 		boomBoxEntity.setYaw(this.getYaw());
 		this.getWorld().spawnEntity(boomBoxEntity);

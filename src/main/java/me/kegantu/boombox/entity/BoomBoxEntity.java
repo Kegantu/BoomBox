@@ -2,10 +2,7 @@ package me.kegantu.boombox.entity;
 
 import me.kegantu.boombox.BoomBox;
 import me.kegantu.boombox.client.screen.BoomboxScreen;
-import me.kegantu.boombox.init.ModEntities;
-import me.kegantu.boombox.init.ModItems;
-import me.kegantu.boombox.init.ModPackets;
-import me.kegantu.boombox.init.ModParticles;
+import me.kegantu.boombox.init.*;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
 import me.kegantu.boombox.utils.AudioDownloader;
@@ -181,8 +178,8 @@ public class BoomBoxEntity extends Entity {
             if (!player.isSneaking()){
                 ItemStack itemStack = new ItemStack(ModItems.BOOMBOX);
                 if (this.dataTracker.get(MUSIC_UUID).isPresent()){
-                    itemStack.getOrCreateSubNbt("MusicUUID").putString("UUID", this.dataTracker.get(MUSIC_UUID).get().toString());
-                    itemStack.getOrCreateSubNbt("MusicUUID").putFloat("Volume", this.dataTracker.get(VOLUME));
+                    itemStack.set(ModComponents.MUSIC_UUID, this.dataTracker.get(MUSIC_UUID).get().toString());
+                    itemStack.set(ModComponents.VOLUME, this.dataTracker.get(VOLUME));
                 }
                 Item item = itemStack.getItem();
                 int i = itemStack.getCount();

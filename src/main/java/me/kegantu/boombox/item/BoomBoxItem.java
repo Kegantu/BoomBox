@@ -2,6 +2,7 @@ package me.kegantu.boombox.item;
 
 import me.kegantu.boombox.BoomBox;
 import me.kegantu.boombox.entity.BoomBoxEntity;
+import me.kegantu.boombox.init.ModComponents;
 import me.kegantu.boombox.init.ModPackets;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -31,21 +32,23 @@ public class BoomBoxItem extends Item {
 
         if (!world.isClient()){
             if (user.isSneaking()){
-                if (stack.getSubNbt("MusicUUID") != null){
+                if (stack.get(ModComponents.MUSIC_UUID) != null){
                     PacketByteBuf buf = PacketByteBufs.create();
-                    buf.writeString(stack.getSubNbt("MusicUUID").getString("UUID"));
+                    buf.writeString(stack.get(ModComponents.MUSIC_UUID));
                     for (ServerPlayerEntity playerEntity : world.getServer().getPlayerManager().getPlayerList()){
                         ServerPlayNetworking.send(playerEntity, ModPackets.BOOMBOX_STOP_S2C, buf);
                     }
-                    stack.getNbt().remove("MusicUUID");
+                    stack.set(ModComponents.MUSIC_UUID, null);
+                    stack.set(ModComponents.VOLUME, null);
                 }
                 return TypedActionResult.success(stack, true);
             }
 
-            if (stack.getSubNbt("MusicUUID") != null){
-                NbtCompound nbt = stack.getSubNbt("MusicUUID");
-                BoomBoxEntity boomBoxEntity = new BoomBoxEntity(world, user.getPos(), UUID.fromString(nbt.getString("UUID")), nbt.getFloat("Volume"));
-                stack.getNbt().remove("MusicUUID");
+            if (stack.get(ModComponents.MUSIC_UUID) != null){
+                String musicUUID = stack.get(ModComponents.MUSIC_UUID);
+                BoomBoxEntity boomBoxEntity = new BoomBoxEntity(world, user.getPos(), UUID.fromString(musicUUID), stack.get(ModComponents.VOLUME));
+                stack.set(ModComponents.MUSIC_UUID, null);
+                stack.set(ModComponents.VOLUME, null);
                 stack.decrement(1);
                 boomBoxEntity.setYaw(user.getYaw());
                 world.spawnEntity(boomBoxEntity);
@@ -61,22 +64,21 @@ public class BoomBoxItem extends Item {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         PlayerEntity playerEntity = (PlayerEntity) entity;
-        if (stack.getSubNbt("MusicUUID") == null){
+        if (stack.get(ModComponents.MUSIC_UUID) == null){
             return;
         }
 
-        NbtCompound nbt = stack.getSubNbt("MusicUUID");
+        String UUID = stack.get(ModComponents.MUSIC_UUID);
 
-        if (MusicManager.getSound(nbt.getString("UUID")) == null){
+        if (MusicManager.getSound(UUID) == null){
             return;
         }
-
-        String UUID = nbt.getString("UUID");
 
         if (!MusicManager.getSound(UUID).isPlaying()){
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeString(UUID);
-            stack.getNbt().remove("MusicUUID");
+            stack.set(ModComponents.MUSIC_UUID, null);
+            stack.set(ModComponents.VOLUME, null);
             ClientPlayNetworking.send(ModPackets.BOOMBOX_STOP_C2S, buf);
             return;
         }

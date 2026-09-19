@@ -42,7 +42,7 @@ public abstract class ScreenHandlerMixin {
             stack = this.slots.get(slotIndex).getStack();
         }
 
-        NbtCompound musicUUIDCompound = stack.getSubNbt("MusicUUID");
+        /*NbtCompound musicUUIDCompound = stack.getSubNbt("MusicUUID");
 
         if (musicUUIDCompound == null){
             return;
@@ -54,7 +54,7 @@ public abstract class ScreenHandlerMixin {
 
         if (stack.isOf(ModItems.BOOMBOX)){
             ci.cancel();
-        }
+        }*/
 
         /*NbtCompound musicUUIDCompound = stack.getSubNbt("MusicUUID");
 
