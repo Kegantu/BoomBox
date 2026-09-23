@@ -23,6 +23,6 @@ public record SoundPositionUpdateS2CPayload(Vector3f position, String musicUUID)
 
     @Override
     public Id<? extends CustomPayload> getId() {
-        return null;
+        return ID;
     }
 }

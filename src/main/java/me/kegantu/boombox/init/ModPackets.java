@@ -45,7 +45,6 @@ public class ModPackets {
             Vector3f soundPos = payload.position();
             String musicUUID = payload.musicUUID();
             int entityId = payload.entityID();
-            BoomBox.LOGGER.info("YA PIDARAS");
 
             BoomBoxEntity entity = (BoomBoxEntity) context.player().getWorld().getEntityById(entityId);
             entity.setMusicUUID(UUID.fromString(musicUUID));
@@ -60,7 +59,6 @@ public class ModPackets {
 
         ServerPlayNetworking.registerGlobalReceiver(BoomboxStopC2SPayload.ID, (payload, context) -> {
             String uuid = payload.musicUUID();
-            BoomBox.LOGGER.info("YA DAUN");
 
             BoomboxStopS2CPayload payloadClient = new BoomboxStopS2CPayload(uuid);
 
@@ -73,7 +71,6 @@ public class ModPackets {
 
         ServerPlayNetworking.registerGlobalReceiver(SoundPositionUpdateC2SPayload.ID, (payload, context) -> {
             SoundPositionUpdateS2CPayload payloadClient = new SoundPositionUpdateS2CPayload(payload.position(), payload.musicUUID());
-            BoomBox.LOGGER.info("YA CHMO");
 
             for (ServerPlayerEntity playerEntity : context.server().getPlayerManager().getPlayerList()){
                 ServerPlayNetworking.send(playerEntity, payloadClient);
@@ -83,7 +80,6 @@ public class ModPackets {
         ServerPlayNetworking.registerGlobalReceiver(UpdateVolumeC2SPayload.ID, (payload, context) -> {
             float volume = payload.volume();
             int entityId = payload.entityID();
-            BoomBox.LOGGER.info("YA GANDON");
 
             UpdateVolumeS2CPayload payloadClient = new UpdateVolumeS2CPayload(volume, payload.musicUUID());
 
@@ -108,11 +104,10 @@ public class ModPackets {
             Vec3d position = new Vec3d(payload.position());
             String uuid = payload.musicUUID();
             String musicOwner = payload.musicOwnerUUID();
-            BoomBox.LOGGER.info("YA PIDARAS CLIENT");
 
             CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink, uuid));
             futureFfmpeg.whenComplete((path, exception) -> {
-                BoomBox.LOGGER.info(exception.toString());
+                BoomBox.LOGGER.info(exception != null ? exception.toString() : "ok");
                 if (exception != null && context.player().squaredDistanceTo(position) <= 32 * 32 && context.player().getUuid() == UUID.fromString(musicOwner)) {
                     context.player().sendMessage(Text.literal("Failed To Download an Audio").formatted(Formatting.RED), true);
                     return;
@@ -127,7 +122,6 @@ public class ModPackets {
 
         ClientPlayNetworking.registerGlobalReceiver(BoomboxStopS2CPayload.ID, (payload, context) -> {
             String musicUUID = payload.musicUUID();
-            BoomBox.LOGGER.info("YA DAUN CLIENT");
 
             if (MusicManager.getSound(musicUUID) != null){
                 MusicManager.getSound(musicUUID).stop();
@@ -138,7 +132,6 @@ public class ModPackets {
         ClientPlayNetworking.registerGlobalReceiver(SoundPositionUpdateS2CPayload.ID, (payload, context) -> {
             Vector3f position = payload.position();
             String musicUUID = payload.musicUUID();
-            BoomBox.LOGGER.info("YA CHMO CLIENT");
 
             if (MusicManager.getSound(musicUUID) == null){
                 return;
@@ -153,7 +146,6 @@ public class ModPackets {
             Vec3d position = new Vec3d(payload.position());
             String uuid = payload.musicUUID();
             float playback = payload.playback();
-            BoomBox.LOGGER.info("YA HZ IDI NAHUI");
 
             CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink, uuid));
             futureFfmpeg.thenAccept(path -> playMusic(path, volume, position, UUID.fromString(uuid), playback));
@@ -162,7 +154,6 @@ public class ModPackets {
         ClientPlayNetworking.registerGlobalReceiver(UpdateVolumeS2CPayload.ID, (payload, context) -> {
             float volume = payload.volume();
             String musicUUID = payload.musicUUID();
-            BoomBox.LOGGER.info("YA GANDON CLIENT");
 
             if (MusicManager.getSound(musicUUID) == null){
                 return;

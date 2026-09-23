@@ -176,6 +176,9 @@ public class BoomBoxEntity extends Entity {
 
         if (!this.getWorld().isClient()) {
             if (!player.isSneaking()){
+                if (this.dataTracker.get(MUSIC_UUID).isPresent() && !this.isPlaying()){
+                    return ActionResult.PASS;
+                }
                 ItemStack itemStack = new ItemStack(ModItems.BOOMBOX);
                 if (this.dataTracker.get(MUSIC_UUID).isPresent()){
                     itemStack.set(ModComponents.BOOMBOX_COMPONENT, new BoomboxComponentDataType(this.dataTracker.get(MUSIC_UUID).get().toString(), this.dataTracker.get(VOLUME)));

@@ -37,14 +37,14 @@ public class Sound {
             return;
         }
 
-        int stereoSamples = pcmShortBuffer.remaining() / 2;
+        /*int stereoSamples = pcmShortBuffer.remaining() / 2;
         short[] mono = new short[stereoSamples];
 
         for (int i = 0; i < stereoSamples; i++) {
             short left  = pcmShortBuffer.get();
             short right = pcmShortBuffer.get();
             mono[i] = (short)((left + right) / 2);
-        }
+        }*/
 
         var sampleRate = sampleRateBuffer.get();
         MemoryStack.stackPop();
@@ -53,7 +53,7 @@ public class Sound {
         soundBufferID = AL10.alGenBuffers();
         soundSourceID = AL10.alGenSources();
 
-        AL10.alBufferData(soundBufferID, AL10.AL_FORMAT_MONO16, mono, sampleRate);
+        AL10.alBufferData(soundBufferID, AL10.AL_FORMAT_MONO16, pcmShortBuffer, sampleRate);
         AL10.alSourcei(soundSourceID, AL10.AL_BUFFER, soundBufferID);
 
         AL10.alSourcei(soundSourceID, AL10.AL_DISTANCE_MODEL, EXTLinearDistance.AL_LINEAR_DISTANCE);

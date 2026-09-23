@@ -32,33 +32,35 @@ public class BoomBoxItem extends Item {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
 
-        if (!world.isClient()){
-            if (user.isSneaking()){
-                if (stack.get(ModComponents.BOOMBOX_COMPONENT) != null){
-                    BoomboxComponentDataType data = stack.get(ModComponents.BOOMBOX_COMPONENT);
-                    BoomboxStopS2CPayload payload = new BoomboxStopS2CPayload(data.musicUUID());
-                    for (ServerPlayerEntity playerEntity : world.getServer().getPlayerManager().getPlayerList()){
-                        ServerPlayNetworking.send(playerEntity, payload);
-                    }
-                    stack.set(ModComponents.BOOMBOX_COMPONENT, null);
-                }
-                return TypedActionResult.success(stack, true);
-            }
+        if (world.isClient()){
+            return TypedActionResult.pass(stack);
+        }
 
+        if (user.isSneaking()){
             if (stack.get(ModComponents.BOOMBOX_COMPONENT) != null){
-                BoomboxComponentDataType data = stack.get(ModComponents.BOOMBOX_COMPONENT);;
-                String musicUUID = data.musicUUID();
-                BoomBoxEntity boomBoxEntity = new BoomBoxEntity(world, user.getPos(), UUID.fromString(musicUUID), data.volume());
+                BoomboxComponentDataType data = stack.get(ModComponents.BOOMBOX_COMPONENT);
+                BoomboxStopS2CPayload payload = new BoomboxStopS2CPayload(data.musicUUID());
+                for (ServerPlayerEntity playerEntity : world.getServer().getPlayerManager().getPlayerList()){
+                    ServerPlayNetworking.send(playerEntity, payload);
+                }
                 stack.set(ModComponents.BOOMBOX_COMPONENT, null);
-                stack.decrement(1);
-                boomBoxEntity.setYaw(user.getYaw());
-                world.spawnEntity(boomBoxEntity);
-                return TypedActionResult.success(stack, true);
             }
-            BoomBoxEntity boomBoxEntity = new BoomBoxEntity(world, user.getPos());
+            return TypedActionResult.success(stack, true);
+        }
+
+        if (stack.get(ModComponents.BOOMBOX_COMPONENT) != null){
+            BoomboxComponentDataType data = stack.get(ModComponents.BOOMBOX_COMPONENT);;
+            String musicUUID = data.musicUUID();
+            BoomBoxEntity boomBoxEntity = new BoomBoxEntity(world, user.getPos(), UUID.fromString(musicUUID), data.volume());
+            stack.set(ModComponents.BOOMBOX_COMPONENT, null);
+            stack.decrement(1);
             boomBoxEntity.setYaw(user.getYaw());
             world.spawnEntity(boomBoxEntity);
+            return TypedActionResult.success(stack, true);
         }
+        BoomBoxEntity boomBoxEntity = new BoomBoxEntity(world, user.getPos());
+        boomBoxEntity.setYaw(user.getYaw());
+        world.spawnEntity(boomBoxEntity);
         return TypedActionResult.success(stack, true);
     }
 
@@ -83,11 +85,9 @@ public class BoomBoxItem extends Item {
             return;
         }
 
-        if (!world.isClient()){
-            ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity) playerEntity;
+        if (world.isClient()){
+            SoundPositionUpdateC2SPayload payload = new SoundPositionUpdateC2SPayload(playerEntity.getPos().toVector3f(), UUID);
+            ClientPlayNetworking.send(payload);
         }
-
-        SoundPositionUpdateC2SPayload payload = new SoundPositionUpdateC2SPayload(playerEntity.getPos().toVector3f(), UUID);
-        ClientPlayNetworking.send(payload);
     }
 }
