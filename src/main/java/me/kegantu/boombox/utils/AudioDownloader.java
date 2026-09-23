@@ -36,20 +36,33 @@ public class AudioDownloader {
         checkSaveDirectorySize();
 
         try {
-            Youtube youtubeVideo = new Youtube(youtubeURL);
-
-            youtubeVideo.streams().filter(StreamQuery.Filter.builder().type("audio").build()).getFirst().download(savePath, uuidFileName);
-
-            String[] command = {FFmpegDownloader.FFMPEG_LOCATION, "-y", "-i", savePath + uuidFileName + ".mp4", savePath + uuidFileName + ".ogg"};
-            ProcessBuilder ffmpegBuilder = new ProcessBuilder(command);
-            ffmpegBuilder.redirectErrorStream(true);
-            Process ffmpeg = ffmpegBuilder.start();
+            String[] ytdlpArgs = {YTDLPDownloader.YTDLP_LOCATION,
+                    youtubeURL,
+                    "-x",
+                    "--no-progress",
+                    "--no-playlist",
+                    "--no-keep-video",
+                    "--break-match-filter",
+                    "ext~=3gp|aac|flv|m4a|mov|mp3|mp4|ogg|wav|webm",
+                    "--audio-format",
+                    "vorbis",
+                    "--audio-quality",
+                    "128K",
+                    "--postprocessor-args",
+                    "ffmpeg:-ac 1 -y",
+                    "--ffmpeg-location",
+                    FFmpegDownloader.FFMPEG_LOCATION,
+                    "-o",
+                    Path.of(savePath + uuidFileName).toString()};
+            ProcessBuilder ytdlpBuilder = new ProcessBuilder(ytdlpArgs);
+            ytdlpBuilder.redirectErrorStream(true);
+            Process ytdlp = ytdlpBuilder.start();
 
             Thread outputReaderThread = new Thread(() -> {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(ffmpeg.getInputStream()))) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(ytdlp.getInputStream()))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
-                        BoomBox.LOGGER.info("FFmpeg Output: {}", line);
+                        BoomBox.LOGGER.info("YTDLP Output: {}", line);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -57,7 +70,7 @@ public class AudioDownloader {
             });
             outputReaderThread.start();
 
-            ffmpeg.waitFor(240, TimeUnit.SECONDS);
+            ytdlp.waitFor(240, TimeUnit.SECONDS);
             outputReaderThread.join();
         } catch (Exception e) {
             throw new RuntimeException(e);
