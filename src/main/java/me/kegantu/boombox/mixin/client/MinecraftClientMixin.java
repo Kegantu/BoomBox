@@ -24,7 +24,7 @@ public class MinecraftClientMixin {
 
     @Shadow @Final public GameOptions options;
 
-    @Inject(method = "openPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundManager;pauseAll()V", shift = At.Shift.AFTER))
+    @Inject(method = "openGameMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundManager;pauseAll()V", shift = At.Shift.AFTER))
     private void pauseBoomboxAudio(boolean pause, CallbackInfo ci){
         List<Sound> music = MusicManager.getCurrentlyPlayingMusic();
         for (int i = 0; i < music.size(); i++) {

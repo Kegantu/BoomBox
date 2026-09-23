@@ -4,6 +4,9 @@ import me.kegantu.boombox.entity.BoomBoxEntity;
 import me.kegantu.boombox.init.ModComponents;
 import me.kegantu.boombox.init.ModPackets;
 import me.kegantu.boombox.item.components.BoomboxComponentDataType;
+import me.kegantu.boombox.networking.payloads.C2S.BoomboxStopC2SPayload;
+import me.kegantu.boombox.networking.payloads.C2S.SoundPositionUpdateC2SPayload;
+import me.kegantu.boombox.networking.payloads.S2C.BoomboxStopS2CPayload;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -32,11 +35,10 @@ public class BoomBoxItem extends Item {
         if (!world.isClient()){
             if (user.isSneaking()){
                 if (stack.get(ModComponents.BOOMBOX_COMPONENT) != null){
-                    PacketByteBuf buf = PacketByteBufs.create();
                     BoomboxComponentDataType data = stack.get(ModComponents.BOOMBOX_COMPONENT);
-                    buf.writeString(data.musicUUID());
+                    BoomboxStopS2CPayload payload = new BoomboxStopS2CPayload(data.musicUUID());
                     for (ServerPlayerEntity playerEntity : world.getServer().getPlayerManager().getPlayerList()){
-                        ServerPlayNetworking.send(playerEntity, ModPackets.BOOMBOX_STOP_S2C, buf);
+                        ServerPlayNetworking.send(playerEntity, payload);
                     }
                     stack.set(ModComponents.BOOMBOX_COMPONENT, null);
                 }
@@ -75,10 +77,9 @@ public class BoomBoxItem extends Item {
         }
 
         if (!MusicManager.getSound(UUID).isPlaying()){
-            PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeString(UUID);
+            BoomboxStopC2SPayload payload = new BoomboxStopC2SPayload(UUID);
             stack.set(ModComponents.BOOMBOX_COMPONENT, null);
-            ClientPlayNetworking.send(ModPackets.BOOMBOX_STOP_C2S, buf);
+            ClientPlayNetworking.send(payload);
             return;
         }
 
@@ -86,9 +87,7 @@ public class BoomBoxItem extends Item {
             ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity) playerEntity;
         }
 
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeVector3f(playerEntity.getPos().toVector3f());
-        buf.writeString(UUID);
-        ClientPlayNetworking.send(ModPackets.SOUND_POSITION_UPDATE_C2S, buf);
+        SoundPositionUpdateC2SPayload payload = new SoundPositionUpdateC2SPayload(playerEntity.getPos().toVector3f(), UUID);
+        ClientPlayNetworking.send(payload);
     }
 }

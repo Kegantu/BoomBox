@@ -1,6 +1,7 @@
 package me.kegantu.boombox.mixin.client;
 
 import com.mojang.authlib.GameProfile;
+import me.kegantu.boombox.init.ModComponents;
 import me.kegantu.boombox.init.ModItems;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -21,7 +22,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     @Inject(method = "dropSelectedItem", at = @At("HEAD"), cancellable = true)
     private void dropBoombox(boolean entireStack, CallbackInfoReturnable<Boolean> cir){
         ItemStack stack = this.getMainHandStack();
-        if (stack.isOf(ModItems.BOOMBOX) && stack.getSubNbt("MusicUUID") != null){
+        if (stack.isOf(ModItems.BOOMBOX) && stack.get(ModComponents.BOOMBOX_COMPONENT) != null){
             cir.cancel();
             //g
         }

@@ -3,6 +3,9 @@ package me.kegantu.boombox.entity;
 import me.kegantu.boombox.client.screen.BoomboxScreen;
 import me.kegantu.boombox.init.*;
 import me.kegantu.boombox.item.components.BoomboxComponentDataType;
+import me.kegantu.boombox.networking.payloads.C2S.BoomboxPlayC2SPayload;
+import me.kegantu.boombox.networking.payloads.C2S.BoomboxStopC2SPayload;
+import me.kegantu.boombox.networking.payloads.C2S.UpdateVolumeC2SPayload;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -212,9 +215,8 @@ public class BoomBoxEntity extends Entity {
     public void downloadMusic(String youtubeLink, double volume, UUID musicOwner){
 
         if (this.dataTracker.get(MUSIC_UUID).isPresent()){
-            PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeString(this.dataTracker.get(MUSIC_UUID).get().toString());
-            ClientPlayNetworking.send(ModPackets.BOOMBOX_STOP_C2S, buf);
+            BoomboxStopC2SPayload payload = new BoomboxStopC2SPayload(this.dataTracker.get(MUSIC_UUID).get().toString());
+            ClientPlayNetworking.send(payload);
 
             if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()) == null){
                 MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()).stop();
@@ -222,15 +224,10 @@ public class BoomBoxEntity extends Entity {
             }
         }
 
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeString(youtubeLink);
-        buf.writeFloat(this.dataTracker.get(VOLUME));
-        buf.writeVector3f(new Vector3f((float) this.getX(), (float) this.getY(), (float) this.getZ()));
-        buf.writeString(UUID.randomUUID().toString());
-        buf.writeInt(this.getId());
-        buf.writeUuid(musicOwner);
+        BoomboxPlayC2SPayload payload = new BoomboxPlayC2SPayload(youtubeLink, this.dataTracker.get(VOLUME),
+                new Vector3f((float) this.getX(), (float) this.getY(), (float) this.getZ()), UUID.randomUUID().toString(), this.getId(), musicOwner.toString());
 
-        ClientPlayNetworking.send(ModPackets.BOOMBOX_PLAY_C2S, buf);
+        ClientPlayNetworking.send(payload);
     }
 
     public void setMusicUUID(UUID uuid){
@@ -248,11 +245,8 @@ public class BoomBoxEntity extends Entity {
             return;
         }
 
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeFloat(volume);
-        buf.writeInt(this.getId());
-        buf.writeUuid(this.dataTracker.get(MUSIC_UUID).get());
-        ClientPlayNetworking.send(ModPackets.UPDATE_VOLUME_C2S, buf);
+        UpdateVolumeC2SPayload payload = new UpdateVolumeC2SPayload(volume, this.getId(), this.dataTracker.get(MUSIC_UUID).get().toString());
+        ClientPlayNetworking.send(payload);
     }
 
     public void setVolumeServer(float volume){

@@ -3,6 +3,11 @@ package me.kegantu.boombox.init;
 import me.kegantu.boombox.BoomBox;
 import me.kegantu.boombox.client.hud.NotificationToast;
 import me.kegantu.boombox.entity.BoomBoxEntity;
+import me.kegantu.boombox.networking.payloads.C2S.BoomboxPlayC2SPayload;
+import me.kegantu.boombox.networking.payloads.C2S.BoomboxStopC2SPayload;
+import me.kegantu.boombox.networking.payloads.C2S.SoundPositionUpdateC2SPayload;
+import me.kegantu.boombox.networking.payloads.C2S.UpdateVolumeC2SPayload;
+import me.kegantu.boombox.networking.payloads.S2C.*;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.ServerMusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
@@ -10,6 +15,7 @@ import me.kegantu.boombox.utils.AudioDownloader;
 import me.kegantu.boombox.utils.YoutubeUtils;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -27,108 +33,101 @@ import java.util.concurrent.CompletableFuture;
 
 public class ModPackets {
 
-    public static final Identifier BOOMBOX_PLAY_S2C = new Identifier(BoomBox.MOD_ID, "boombox_play_client");
-    public static final Identifier BOOMBOX_ON_JOIN_SYNC_S2C = new Identifier(BoomBox.MOD_ID, "boombox_on_join_sync_client");
-    public static final Identifier BOOMBOX_STOP_S2C = new Identifier(BoomBox.MOD_ID, "boombox_stop_client");
-    public static final Identifier SOUND_POSITION_UPDATE_S2C = new Identifier(BoomBox.MOD_ID, "sound_position_update_client");
-    public static final Identifier UPDATE_VOLUME_S2C = new Identifier(BoomBox.MOD_ID, "update_volume_client");
-
-    public static final Identifier BOOMBOX_PLAY_C2S = new Identifier(BoomBox.MOD_ID, "boombox_play_server");
-    public static final Identifier BOOMBOX_STOP_C2S = new Identifier(BoomBox.MOD_ID, "boombox_stop_server");
-    public static final Identifier SOUND_POSITION_UPDATE_C2S = new Identifier(BoomBox.MOD_ID, "sound_position_update_server");
-    public static final Identifier UPDATE_VOLUME_C2S = new Identifier(BoomBox.MOD_ID, "update_volume_server");
-
     public static void registerC2SPackets(){
-        ServerPlayNetworking.registerGlobalReceiver(BOOMBOX_PLAY_C2S,
-                (server, player, handler, buf, responseSender) ->{
-                    PacketByteBuf bufClient = PacketByteBufs.create();
-                    String url = buf.readString();
-                    float volume = buf.readFloat();
-                    Vector3f soundPos = buf.readVector3f();
+        PayloadTypeRegistry.playC2S().register(BoomboxPlayC2SPayload.ID, BoomboxPlayC2SPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(BoomboxStopC2SPayload.ID, BoomboxStopC2SPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(SoundPositionUpdateC2SPayload.ID, SoundPositionUpdateC2SPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(UpdateVolumeC2SPayload.ID, UpdateVolumeC2SPayload.CODEC);
 
-                    bufClient.writeString(url);
-                    bufClient.writeFloat(volume);
-                    bufClient.writeVector3f(soundPos);
-                    String musicUUID = buf.readString();
-                    int entityId = buf.readInt();
-                    BoomBoxEntity entity = (BoomBoxEntity) player.getWorld().getEntityById(entityId);
-                    entity.setMusicUUID(UUID.fromString(musicUUID));
-                    bufClient.writeString(musicUUID);
-                    bufClient.writeInt(entityId);
-                    bufClient.writeUuid(buf.readUuid());
+        ServerPlayNetworking.registerGlobalReceiver(BoomboxPlayC2SPayload.ID, (payload, context) -> {
+            String url = payload.url();
+            float volume = payload.volume();
+            Vector3f soundPos = payload.position();
+            String musicUUID = payload.musicUUID();
+            int entityId = payload.entityID();
+            BoomBox.LOGGER.info("YA PIDARAS");
 
-                    ServerMusicManager.addMusicURL(musicUUID, new Triplet<>(url, soundPos, volume));
+            BoomBoxEntity entity = (BoomBoxEntity) context.player().getWorld().getEntityById(entityId);
+            entity.setMusicUUID(UUID.fromString(musicUUID));
+            BoomboxPlayS2CPayload payloadClient = new BoomboxPlayS2CPayload(url, volume, soundPos, musicUUID, payload.musicOwnerUUID());
 
-                    for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()){
-                        ServerPlayNetworking.send(playerEntity, BOOMBOX_PLAY_S2C, bufClient);
-                    }
-                });
+            ServerMusicManager.addMusicURL(musicUUID, new Triplet<>(url, soundPos, volume));
 
-        ServerPlayNetworking.registerGlobalReceiver(BOOMBOX_STOP_C2S,
-                (server, player, handler, buf, responseSender) -> {
-                    PacketByteBuf bufClient = PacketByteBufs.create();
-                    String uuid = buf.readString();
-                    bufClient.writeString(uuid);
-
-                    ServerMusicManager.remove(uuid);
-
-                    for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()){
-                        ServerPlayNetworking.send(playerEntity, BOOMBOX_STOP_S2C, bufClient);
-                    }
+            for (ServerPlayerEntity playerEntity : context.server().getPlayerManager().getPlayerList()){
+                ServerPlayNetworking.send(playerEntity, payloadClient);
+            }
         });
 
-        ServerPlayNetworking.registerGlobalReceiver(SOUND_POSITION_UPDATE_C2S,
-                (server, player, handler, buf, responseSender) -> {
-                    PacketByteBuf bufClient = PacketByteBufs.create();
-                    bufClient.writeVector3f(buf.readVector3f());
-                    bufClient.writeString(buf.readString());
+        ServerPlayNetworking.registerGlobalReceiver(BoomboxStopC2SPayload.ID, (payload, context) -> {
+            String uuid = payload.musicUUID();
+            BoomBox.LOGGER.info("YA DAUN");
 
-                    for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()){
-                        ServerPlayNetworking.send(playerEntity, SOUND_POSITION_UPDATE_S2C, bufClient);
-                    }
-                });
+            BoomboxStopS2CPayload payloadClient = new BoomboxStopS2CPayload(uuid);
 
-        ServerPlayNetworking.registerGlobalReceiver(UPDATE_VOLUME_C2S,
-                (server, player, handler, buf, responseSender) -> {
-                    PacketByteBuf bufClient = PacketByteBufs.create();
-                    float volume = buf.readFloat();
-                    int entityId = buf.readInt();
-                    bufClient.writeFloat(volume);
-                    bufClient.writeUuid(buf.readUuid());
+            ServerMusicManager.remove(uuid);
 
-                    BoomBoxEntity entity = (BoomBoxEntity) player.getWorld().getEntityById(entityId);
-                    entity.setVolumeServer(volume);
-                    for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()){
-                        ServerPlayNetworking.send(playerEntity, UPDATE_VOLUME_S2C, bufClient);
-                    }
+            for (ServerPlayerEntity playerEntity : context.server().getPlayerManager().getPlayerList()){
+                ServerPlayNetworking.send(playerEntity, payloadClient);
+            }
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(SoundPositionUpdateC2SPayload.ID, (payload, context) -> {
+            SoundPositionUpdateS2CPayload payloadClient = new SoundPositionUpdateS2CPayload(payload.position(), payload.musicUUID());
+            BoomBox.LOGGER.info("YA CHMO");
+
+            for (ServerPlayerEntity playerEntity : context.server().getPlayerManager().getPlayerList()){
+                ServerPlayNetworking.send(playerEntity, payloadClient);
+            }
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(UpdateVolumeC2SPayload.ID, (payload, context) -> {
+            float volume = payload.volume();
+            int entityId = payload.entityID();
+            BoomBox.LOGGER.info("YA GANDON");
+
+            UpdateVolumeS2CPayload payloadClient = new UpdateVolumeS2CPayload(volume, payload.musicUUID());
+
+            BoomBoxEntity entity = (BoomBoxEntity) context.player().getWorld().getEntityById(entityId);
+            entity.setVolumeServer(volume);
+            for (ServerPlayerEntity playerEntity : context.server().getPlayerManager().getPlayerList()){
+                ServerPlayNetworking.send(playerEntity, payloadClient);
+            }
         });
     }
 
     public static void registerS2CPackets(){
-        ClientPlayNetworking.registerGlobalReceiver(BOOMBOX_PLAY_S2C, (client, handler, buf, responseSender) -> {
-            String youtubeLink = buf.readString();
-            float volume = buf.readFloat();
-            Vec3d position = new Vec3d(buf.readVector3f());
-            String uuid = buf.readString();
-            UUID musicOwner = buf.readUuid();
+        PayloadTypeRegistry.playS2C().register(BoomboxPlayS2CPayload.ID, BoomboxPlayS2CPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(BoomboxStopS2CPayload.ID, BoomboxStopS2CPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(SoundPositionUpdateS2CPayload.ID, SoundPositionUpdateS2CPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(UpdateVolumeS2CPayload.ID, UpdateVolumeS2CPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(BoomboxOnJoinSyncS2CPayload.ID, BoomboxOnJoinSyncS2CPayload.CODEC);
+
+        ClientPlayNetworking.registerGlobalReceiver(BoomboxPlayS2CPayload.ID, (payload, context) -> {
+            String youtubeLink = payload.url();
+            float volume = payload.volume();
+            Vec3d position = new Vec3d(payload.position());
+            String uuid = payload.musicUUID();
+            String musicOwner = payload.musicOwnerUUID();
+            BoomBox.LOGGER.info("YA PIDARAS CLIENT");
 
             CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink, uuid));
             futureFfmpeg.whenComplete((path, exception) -> {
-                if (exception != null && client.player.squaredDistanceTo(position) <= 32 * 32 && client.player.getUuid() == musicOwner) {
-                    client.player.sendMessage(Text.literal("Failed To Download an Audio").formatted(Formatting.RED), true);
+                BoomBox.LOGGER.info(exception.toString());
+                if (exception != null && context.player().squaredDistanceTo(position) <= 32 * 32 && context.player().getUuid() == UUID.fromString(musicOwner)) {
+                    context.player().sendMessage(Text.literal("Failed To Download an Audio").formatted(Formatting.RED), true);
                     return;
                 }
 
                 playMusic(path, volume, position, UUID.fromString(uuid));
-                if (client.player.squaredDistanceTo(position) <= 32 * 32){
-                    client.getToastManager().add(new NotificationToast(YoutubeUtils.getTitle(youtubeLink)));
+                if (context.player().squaredDistanceTo(position) <= 32 * 32){
+                    context.client().getToastManager().add(new NotificationToast(YoutubeUtils.getTitle(youtubeLink)));
                 }
             });
-
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(BOOMBOX_STOP_S2C, (client, handler, buf, responseSender) -> {
-            String musicUUID = buf.readString();
+        ClientPlayNetworking.registerGlobalReceiver(BoomboxStopS2CPayload.ID, (payload, context) -> {
+            String musicUUID = payload.musicUUID();
+            BoomBox.LOGGER.info("YA DAUN CLIENT");
 
             if (MusicManager.getSound(musicUUID) != null){
                 MusicManager.getSound(musicUUID).stop();
@@ -136,9 +135,10 @@ public class ModPackets {
             }
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(SOUND_POSITION_UPDATE_S2C, (client, handler, buf, responseSender) -> {
-            Vector3f position = buf.readVector3f();
-            String musicUUID = buf.readString();
+        ClientPlayNetworking.registerGlobalReceiver(SoundPositionUpdateS2CPayload.ID, (payload, context) -> {
+            Vector3f position = payload.position();
+            String musicUUID = payload.musicUUID();
+            BoomBox.LOGGER.info("YA CHMO CLIENT");
 
             if (MusicManager.getSound(musicUUID) == null){
                 return;
@@ -147,26 +147,28 @@ public class ModPackets {
             MusicManager.getSound(musicUUID).setPosition(position);
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(BOOMBOX_ON_JOIN_SYNC_S2C, (client, handler, buf, responseSender) -> {
-            String youtubeLink = buf.readString();
-            float volume = buf.readFloat();
-            Vec3d position = new Vec3d(buf.readVector3f());
-            String uuid = buf.readString();
-            float playback = buf.readFloat();
+        ClientPlayNetworking.registerGlobalReceiver(BoomboxOnJoinSyncS2CPayload.ID, (payload, context) -> {
+            String youtubeLink = payload.url();
+            float volume = payload.volume();
+            Vec3d position = new Vec3d(payload.position());
+            String uuid = payload.musicUUID();
+            float playback = payload.playback();
+            BoomBox.LOGGER.info("YA HZ IDI NAHUI");
 
             CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink, uuid));
             futureFfmpeg.thenAccept(path -> playMusic(path, volume, position, UUID.fromString(uuid), playback));
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(UPDATE_VOLUME_S2C, (client, handler, buf, responseSender) -> {
-            float volume = buf.readFloat();
-            UUID musicUUID = buf.readUuid();
+        ClientPlayNetworking.registerGlobalReceiver(UpdateVolumeS2CPayload.ID, (payload, context) -> {
+            float volume = payload.volume();
+            String musicUUID = payload.musicUUID();
+            BoomBox.LOGGER.info("YA GANDON CLIENT");
 
-            if (MusicManager.getSound(musicUUID.toString()) == null){
+            if (MusicManager.getSound(musicUUID) == null){
                 return;
             }
 
-            MusicManager.getSound(musicUUID.toString()).setVolume(volume);
+            MusicManager.getSound(musicUUID).setVolume(volume);
         });
     }
 

@@ -51,10 +51,9 @@ public class Sound {
         MemoryStack.stackPop();
 
         soundBufferID = AL10.alGenBuffers();
-        AL10.alBufferData(soundBufferID, AL10.AL_FORMAT_MONO16, mono, sampleRate);
-
         soundSourceID = AL10.alGenSources();
 
+        AL10.alBufferData(soundBufferID, AL10.AL_FORMAT_MONO16, mono, sampleRate);
         AL10.alSourcei(soundSourceID, AL10.AL_BUFFER, soundBufferID);
 
         AL10.alSourcei(soundSourceID, AL10.AL_DISTANCE_MODEL, EXTLinearDistance.AL_LINEAR_DISTANCE);

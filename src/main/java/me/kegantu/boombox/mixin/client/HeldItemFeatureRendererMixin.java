@@ -1,5 +1,6 @@
 package me.kegantu.boombox.mixin.client;
 
+import me.kegantu.boombox.init.ModComponents;
 import me.kegantu.boombox.init.ModItems;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
@@ -36,7 +37,7 @@ public abstract class HeldItemFeatureRendererMixin<T extends LivingEntity, M ext
             return;
         }
 
-        if (stack.getSubNbt("MusicUUID") == null){
+        if (stack.get(ModComponents.BOOMBOX_COMPONENT) == null){
             return;
         }
 

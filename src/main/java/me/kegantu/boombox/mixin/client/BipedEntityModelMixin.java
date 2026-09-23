@@ -1,5 +1,6 @@
 package me.kegantu.boombox.mixin.client;
 
+import me.kegantu.boombox.init.ModComponents;
 import me.kegantu.boombox.init.ModItems;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.model.AnimalModel;
@@ -32,7 +33,7 @@ public abstract class BipedEntityModelMixin <T extends LivingEntity> extends Ani
         }
 
         ItemStack itemStack = player.getOffHandStack();
-        if (itemStack.getSubNbt("MusicUUID") == null){
+        if (itemStack.get(ModComponents.BOOMBOX_COMPONENT) == null){
             return;
         }
 
@@ -59,7 +60,7 @@ public abstract class BipedEntityModelMixin <T extends LivingEntity> extends Ani
         }
 
         ItemStack itemStack = player.getMainHandStack();
-        if (itemStack.getSubNbt("MusicUUID") == null){
+        if (itemStack.get(ModComponents.BOOMBOX_COMPONENT) == null){
             return;
         }
 

@@ -1,6 +1,7 @@
 package me.kegantu.boombox.mixin;
 
 import me.kegantu.boombox.init.ModPackets;
+import me.kegantu.boombox.networking.payloads.S2C.BoomboxOnJoinSyncS2CPayload;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.ServerMusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
@@ -36,13 +37,9 @@ public abstract class PlayerManagerMixin {
             float volume = musicInfo.getC();
             Vector3f position = musicInfo.getB();
 
-            PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeString(url);
-            buf.writeFloat(volume);
-            buf.writeVector3f(position);
-            buf.writeString(musicUUID);
-            buf.writeFloat(MusicManager.getSound(musicUUID) == null ? 0 : MusicManager.getSound(musicUUID).getPlayback());
-            ServerPlayNetworking.send(player, ModPackets.BOOMBOX_ON_JOIN_SYNC_S2C, buf);
+            BoomboxOnJoinSyncS2CPayload payload = new BoomboxOnJoinSyncS2CPayload(url, volume, position, musicUUID,
+                    MusicManager.getSound(musicUUID) == null ? 0 : MusicManager.getSound(musicUUID).getPlayback());
+            ServerPlayNetworking.send(player, payload);
         }
     }
 }

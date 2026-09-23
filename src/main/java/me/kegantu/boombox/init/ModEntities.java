@@ -14,7 +14,7 @@ import net.minecraft.util.Identifier;
 public class ModEntities {
 
     public static final EntityType<BoomBoxEntity> BOOMBOX_ENTITY = Registry.register(Registries.ENTITY_TYPE, Identifier.of(BoomBox.MOD_ID, "boombox_entity"),
-            FabricEntityTypeBuilder.<BoomBoxEntity>create(SpawnGroup.MISC, BoomBoxEntity::new).dimensions(EntityDimensions.fixed(0.5f, 0.5f)).build());
+            EntityType.Builder.<BoomBoxEntity>create(BoomBoxEntity::new, SpawnGroup.MISC).dimensions(0.5f, 0.5f).build());
 
     public static void register(){
 
