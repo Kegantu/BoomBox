@@ -2,23 +2,20 @@ package me.kegantu.boombox.item;
 
 import me.kegantu.boombox.entity.BoomBoxEntity;
 import me.kegantu.boombox.init.ModComponents;
-import me.kegantu.boombox.init.ModPackets;
 import me.kegantu.boombox.item.components.BoomboxComponentDataType;
 import me.kegantu.boombox.networking.payloads.C2S.BoomboxStopC2SPayload;
 import me.kegantu.boombox.networking.payloads.C2S.SoundPositionUpdateC2SPayload;
 import me.kegantu.boombox.networking.payloads.S2C.BoomboxStopS2CPayload;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 
 import java.util.UUID;
@@ -29,11 +26,11 @@ public class BoomBoxItem extends Item {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
 
         if (world.isClient()){
-            return TypedActionResult.pass(stack);
+            return ActionResult.PASS;
         }
 
         if (user.isSneaking()){
@@ -45,7 +42,7 @@ public class BoomBoxItem extends Item {
                 }
                 stack.set(ModComponents.BOOMBOX_COMPONENT, null);
             }
-            return TypedActionResult.success(stack, true);
+            return ActionResult.SUCCESS_SERVER;
         }
 
         if (stack.get(ModComponents.BOOMBOX_COMPONENT) != null){
@@ -56,12 +53,12 @@ public class BoomBoxItem extends Item {
             stack.decrement(1);
             boomBoxEntity.setYaw(user.getYaw());
             world.spawnEntity(boomBoxEntity);
-            return TypedActionResult.success(stack, true);
+            return ActionResult.SUCCESS_SERVER;
         }
         BoomBoxEntity boomBoxEntity = new BoomBoxEntity(world, user.getPos());
         boomBoxEntity.setYaw(user.getYaw());
         world.spawnEntity(boomBoxEntity);
-        return TypedActionResult.success(stack, true);
+        return ActionResult.SUCCESS_SERVER;
     }
 
     @Override

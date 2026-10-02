@@ -4,6 +4,7 @@
 
 package me.kegantu.boombox.client.entity.model;
 
+import me.kegantu.boombox.client.entity.renderstate.BoomBoxEntityRenderState;
 import me.kegantu.boombox.entity.BoomBoxEntity;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.VertexConsumer;
@@ -11,9 +12,10 @@ import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 
-public class BoomBoxEntityModel extends EntityModel<BoomBoxEntity> {
+public class BoomBoxEntityModel extends EntityModel<BoomBoxEntityRenderState> {
 	private final ModelPart root;
 	public BoomBoxEntityModel(ModelPart root) {
+		super(root);
 		this.root = root.getChild("root");
 	}
 	public static TexturedModelData getTexturedModelData() {
@@ -26,12 +28,5 @@ public class BoomBoxEntityModel extends EntityModel<BoomBoxEntity> {
 		.uv(0, 8).cuboid(-3.0F, -7.0F, 0.0F, 6.0F, 1.0F, 1.0F, new Dilation(0.0F))
 		.uv(4, 14).cuboid(3.0F, -7.0F, 0.0F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 24.0F, 0.0F));
 		return TexturedModelData.of(modelData, 32, 32);
-	}
-	@Override
-	public void setAngles(BoomBoxEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-	}
-	@Override
-	public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
-		root.render(matrices, vertexConsumer, light, overlay, color);
 	}
 }

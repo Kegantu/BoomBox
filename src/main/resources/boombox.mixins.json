@@ -1,21 +1,20 @@
 {
 	"required": true,
 	"package": "me.kegantu.boombox.mixin",
-	"compatibilityLevel": "JAVA_21",
+	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-      "PlayerEntityMixin",
-		"PlayerInventoryMixin",
-		"ScreenHandlerMixin",
 		"ItemEntityMixin",
+		"MinecraftServerMixin",
+		"PlayerEntityMixin",
+		"PlayerInventoryMixin",
 		"PlayerManagerMixin",
-		"MinecraftServerMixin"
+		"ScreenHandlerMixin"
 	],
 	"client": [
-		"client.MinecraftClientMixin",
 		"client.BipedEntityModelMixin",
 		"client.HeldItemFeatureRendererMixin",
-		"client.ModelLoaderMixin",
 		"client.ItemRendererMixin",
+		"client.MinecraftClientMixin",
 		"client.ToastManagerEntryMixin"
 	],
 	"injectors": {

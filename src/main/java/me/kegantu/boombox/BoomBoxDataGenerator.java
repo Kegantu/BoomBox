@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.block.Blocks;
 import net.minecraft.data.server.recipe.RecipeExporter;
+import net.minecraft.data.server.recipe.RecipeGenerator;
 import net.minecraft.data.server.recipe.ShapedRecipeJsonBuilder;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.book.RecipeCategory;
@@ -27,19 +28,29 @@ public class BoomBoxDataGenerator implements DataGeneratorEntrypoint {
             super(output, registriesFuture);
         }
 
-        @Override
-		public void generate(RecipeExporter exporter) {
-			ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, ModItems.BOOMBOX)
-					.pattern(" r ")
-					.pattern("njn")
-					.pattern("iii")
-					.input('r', Items.REDSTONE_BLOCK)
-					.input('n', Blocks.NOTE_BLOCK)
-					.input('j', Blocks.JUKEBOX)
-					.input('i', Items.IRON_INGOT)
-					.criterion(FabricRecipeProvider.hasItem(Blocks.NOTE_BLOCK.asItem()), FabricRecipeProvider.conditionsFromItem(Blocks.NOTE_BLOCK.asItem()))
-					.criterion(FabricRecipeProvider.hasItem(Blocks.JUKEBOX.asItem()), FabricRecipeProvider.conditionsFromItem(Blocks.JUKEBOX.asItem()))
-					.offerTo(exporter);
+		@Override
+		protected RecipeGenerator getRecipeGenerator(RegistryWrapper.WrapperLookup registries, RecipeExporter exporter) {
+			return new RecipeGenerator(registries, exporter) {
+				@Override
+				public void generate() {
+					createShaped(RecipeCategory.MISC, ModItems.BOOMBOX)
+							.pattern(" r ")
+							.pattern("njn")
+							.pattern("iii")
+							.input('r', Items.REDSTONE_BLOCK)
+							.input('n', Blocks.NOTE_BLOCK)
+							.input('j', Blocks.JUKEBOX)
+							.input('i', Items.IRON_INGOT)
+							.criterion(hasItem(Blocks.NOTE_BLOCK.asItem()), conditionsFromItem(Blocks.NOTE_BLOCK.asItem()))
+							.criterion(hasItem(Blocks.JUKEBOX.asItem()), conditionsFromItem(Blocks.JUKEBOX.asItem()))
+							.offerTo(exporter);
+				}
+			};
+		}
+
+		@Override
+		public String getName() {
+			return "Boombox Recipies";
 		}
 	}
 }

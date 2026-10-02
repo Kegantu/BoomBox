@@ -13,7 +13,7 @@ public record SoundPositionUpdateC2SPayload(Vector3f position, String musicUUID)
     public static final Identifier SOUND_POSITION_UPDATE_C2S_ID = Identifier.of(BoomBox.MOD_ID, "sound_position_update_server");
     public static final CustomPayload.Id<SoundPositionUpdateC2SPayload> ID = new CustomPayload.Id<>(SOUND_POSITION_UPDATE_C2S_ID);
     public static final PacketCodec<RegistryByteBuf, SoundPositionUpdateC2SPayload> CODEC = PacketCodec.tuple(
-            PacketCodecs.VECTOR3F,
+            PacketCodecs.VECTOR_3F,
             SoundPositionUpdateC2SPayload::position,
             PacketCodecs.STRING,
             SoundPositionUpdateC2SPayload::musicUUID,

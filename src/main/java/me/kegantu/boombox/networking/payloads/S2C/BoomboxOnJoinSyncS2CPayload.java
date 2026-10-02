@@ -17,7 +17,7 @@ public record BoomboxOnJoinSyncS2CPayload(String url, float volume, Vector3f pos
             BoomboxOnJoinSyncS2CPayload::url,
             PacketCodecs.FLOAT,
             BoomboxOnJoinSyncS2CPayload::volume,
-            PacketCodecs.VECTOR3F,
+            PacketCodecs.VECTOR_3F,
             BoomboxOnJoinSyncS2CPayload::position,
             PacketCodecs.STRING,
             BoomboxOnJoinSyncS2CPayload::musicUUID,

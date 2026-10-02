@@ -9,12 +9,14 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 
 public class ModEntities {
 
     public static final EntityType<BoomBoxEntity> BOOMBOX_ENTITY = Registry.register(Registries.ENTITY_TYPE, Identifier.of(BoomBox.MOD_ID, "boombox_entity"),
-            EntityType.Builder.<BoomBoxEntity>create(BoomBoxEntity::new, SpawnGroup.MISC).dimensions(0.5f, 0.5f).build());
+            EntityType.Builder.<BoomBoxEntity>create(BoomBoxEntity::new, SpawnGroup.MISC).dimensions(0.5f, 0.5f).build(RegistryKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of(BoomBox.MOD_ID, "boombox_entity"))));
 
     public static void register(){
 

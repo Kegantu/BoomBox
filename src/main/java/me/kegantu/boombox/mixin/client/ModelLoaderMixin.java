@@ -1,8 +1,9 @@
 package me.kegantu.boombox.mixin.client;
 
 import me.kegantu.boombox.BoomBox;
+import net.fabricmc.fabric.api.client.model.loading.v1.FabricBakedModelManager;
 import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.render.model.ModelLoader;
+import net.minecraft.client.render.model.ModelBaker;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
@@ -14,15 +15,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
 
-@Mixin(ModelLoader.class)
+@Mixin(ModelBaker.class)
 public abstract class ModelLoaderMixin {
-
+/*
     @Shadow
     protected abstract void loadItemModel(ModelIdentifier id);
 
     @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/model/ModelLoader;loadItemModel(Lnet/minecraft/client/util/ModelIdentifier;)V", ordinal = 1))
     private void loadBoomboxOnModel(BlockColors blockColors, Profiler profiler, Map jsonUnbakedModels, Map blockStates, CallbackInfo ci){
-        Identifier id = Identifier.of(BoomBox.MOD_ID, "boombox_on");
+        Identifier id = ;
         this.loadItemModel(ModelIdentifier.ofInventoryVariant(id));
-    }
+    }*/
 }

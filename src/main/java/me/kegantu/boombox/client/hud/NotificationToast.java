@@ -5,7 +5,9 @@ import me.kegantu.boombox.BoomBox;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
 import net.minecraft.client.util.math.MatrixStack;
@@ -17,16 +19,27 @@ import net.minecraft.util.math.RotationAxis;
 @Environment(EnvType.CLIENT)
 public class NotificationToast implements Toast {
 
-    private final Identifier NOTIFICATIONS_TEXTURE = Identifier.of(BoomBox.MOD_ID, "textures/gui/notifications.png");
+    private final Identifier NOTIFICATIONS_TEXTURE = Identifier.of(BoomBox.MOD_ID, "toast/notifications");
     private final String soundtrackName;
     private float rotation;
+    private Toast.Visibility visibility = Toast.Visibility.HIDE;
 
     public NotificationToast(String soundtrackName) {
         this.soundtrackName = soundtrackName;
     }
 
     @Override
-    public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
+    public Visibility getVisibility() {
+        return this.visibility;
+    }
+
+    @Override
+    public void update(ToastManager manager, long time) {
+        this.visibility = time >= 7500.0 * manager.getNotificationDisplayTimeMultiplier() ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
+    }
+
+    @Override
+    public void draw(DrawContext context, TextRenderer textRenderer, long startTime) {
         MatrixStack stack = context.getMatrices();
         rotation += 0.5f * MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(true);
         if (rotation >= 360f){
@@ -35,22 +48,20 @@ public class NotificationToast implements Toast {
 
         var delta = rotation / 360;
         RenderSystem.enableBlend();
-        context.drawTexture(NOTIFICATIONS_TEXTURE, 0,0,0,0, 176, 43);
+        context.drawGuiTexture(RenderLayer::getGuiTextured, NOTIFICATIONS_TEXTURE, 256, 256, 0,0,0,0, 176, 43);
         stack.push();
         stack.translate(4.5f, 5f, 0f);
         stack.scale(1.6f,1.6f,1.6f);
         stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MathHelper.lerp(delta, 0f, 360f)), 10f, 10f,0f);
-        context.drawTexture(NOTIFICATIONS_TEXTURE, 0,0,177,2, 20, 20);
+        context.drawGuiTexture(RenderLayer::getGuiTextured, NOTIFICATIONS_TEXTURE, 256, 256, 177,2,0,0, 20, 20);
         stack.pop();
 
-        var textLine = manager.getClient().textRenderer.wrapLines(StringVisitable.plain(soundtrackName), 140);
+        var textLine = textRenderer.wrapLines(StringVisitable.plain(soundtrackName), 140);
         int y = 7;
         for (int i = 0; i < textLine.size(); i++) {
-            context.drawText(manager.getClient().textRenderer, textLine.get(i), 40, y, 1947988, false);
+            context.drawText(textRenderer, textLine.get(i), 40, y, 1947988, false);
             y += 10;
         }
-
-        return startTime >= 7500.0 * manager.getNotificationDisplayTimeMultiplier() ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
     }
 
     @Override

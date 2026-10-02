@@ -14,6 +14,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MovementType;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -153,6 +154,11 @@ public class BoomBoxEntity extends Entity {
         if (this.getWorld() instanceof ServerWorld serverWorld){
             serverWorld.spawnParticles(ModParticles.BOOMBOX_NOTE, this.getX(), this.getY() + 0.25f, this.getZ(), 1, 0f,0f,0f, 0f);
         }
+    }
+
+    @Override
+    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+        return false;
     }
 
     private void applyWaterBuoyancy() {
