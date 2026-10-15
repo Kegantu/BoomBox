@@ -2,6 +2,7 @@ package me.kegantu.boombox.mixin.client;
 
 import me.kegantu.boombox.init.ModComponents;
 import me.kegantu.boombox.init.ModItems;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.model.*;
 import net.minecraft.client.render.entity.state.BipedEntityRenderState;
@@ -31,11 +32,11 @@ public abstract class BipedEntityModelMixin <T extends BipedEntityRenderState> e
 
     @Inject(method = "positionLeftArm", at = @At("HEAD"), cancellable = true)
     private void positionLeftArm(T state, BipedEntityModel.ArmPose armPose, CallbackInfo ci){
-        if (!(state instanceof PlayerEntityRenderState playerState)){
+        if (!(state instanceof PlayerEntityRenderState)){
             return;
         }
 
-        ItemStack itemStack = playerState.leftHandStack;
+        ItemStack itemStack = MinecraftClient.getInstance().player.getOffHandStack();
         if (itemStack.get(ModComponents.BOOMBOX_COMPONENT) == null){
             return;
         }
@@ -58,11 +59,11 @@ public abstract class BipedEntityModelMixin <T extends BipedEntityRenderState> e
 
     @Inject(method = "positionRightArm", at = @At("HEAD"), cancellable = true)
     private void positionRightArm(T state, BipedEntityModel.ArmPose armPose, CallbackInfo ci){
-        if (!(state instanceof PlayerEntityRenderState playerState)){
+        if (!(state instanceof PlayerEntityRenderState)){
             return;
         }
 
-        ItemStack itemStack = playerState.getMainHandStack();
+        ItemStack itemStack = MinecraftClient.getInstance().player.getMainHandStack();
         if (itemStack.get(ModComponents.BOOMBOX_COMPONENT) == null){
             return;
         }
