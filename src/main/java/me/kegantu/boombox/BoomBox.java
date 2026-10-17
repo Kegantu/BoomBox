@@ -1,6 +1,7 @@
 package me.kegantu.boombox;
 
 import me.kegantu.boombox.init.*;
+import me.kegantu.boombox.utils.DenoDownloader;
 import me.kegantu.boombox.utils.FFmpegDownloader;
 import me.kegantu.boombox.utils.YTDLPDownloader;
 import net.fabricmc.api.ModInitializer;
@@ -27,6 +28,7 @@ public class BoomBox implements ModInitializer {
 		ModComponents.register();
 		FFmpegDownloader.download();
 		YTDLPDownloader.download();
+		DenoDownloader.download();
 
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> entries.add(ModItems.BOOMBOX));
 	}

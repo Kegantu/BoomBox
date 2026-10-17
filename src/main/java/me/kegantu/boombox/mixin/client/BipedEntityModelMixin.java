@@ -1,14 +1,11 @@
 package me.kegantu.boombox.mixin.client;
 
+import me.kegantu.boombox.extensionAccessor.PlayerEntityRenderStateAccessor;
 import me.kegantu.boombox.init.ModComponents;
 import me.kegantu.boombox.init.ModItems;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.model.*;
 import net.minecraft.client.render.entity.state.BipedEntityRenderState;
-import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,16 +29,17 @@ public abstract class BipedEntityModelMixin <T extends BipedEntityRenderState> e
 
     @Inject(method = "positionLeftArm", at = @At("HEAD"), cancellable = true)
     private void positionLeftArm(T state, BipedEntityModel.ArmPose armPose, CallbackInfo ci){
-        if (!(state instanceof PlayerEntityRenderState)){
+        if (!(state instanceof PlayerEntityRenderStateAccessor extension)){
             return;
         }
 
-        ItemStack itemStack = MinecraftClient.getInstance().player.getOffHandStack();
+        ItemStack itemStack = extension.getBoomboxItemStackLeftHand();
+
+        if (!itemStack.isOf(ModItems.BOOMBOX)){
+            return;
+        }
+
         if (itemStack.get(ModComponents.BOOMBOX_COMPONENT) == null){
-            return;
-        }
-
-        if (itemStack.getItem() != ModItems.BOOMBOX){
             return;
         }
 
@@ -59,16 +57,17 @@ public abstract class BipedEntityModelMixin <T extends BipedEntityRenderState> e
 
     @Inject(method = "positionRightArm", at = @At("HEAD"), cancellable = true)
     private void positionRightArm(T state, BipedEntityModel.ArmPose armPose, CallbackInfo ci){
-        if (!(state instanceof PlayerEntityRenderState)){
+        if (!(state instanceof PlayerEntityRenderStateAccessor extension)){
             return;
         }
 
-        ItemStack itemStack = MinecraftClient.getInstance().player.getMainHandStack();
+        ItemStack itemStack = extension.getBoomboxItemStackRightHand();
+
+        if (!itemStack.isOf(ModItems.BOOMBOX)){
+            return;
+        }
+
         if (itemStack.get(ModComponents.BOOMBOX_COMPONENT) == null){
-            return;
-        }
-
-        if (itemStack.getItem() != ModItems.BOOMBOX){
             return;
         }
 
