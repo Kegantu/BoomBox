@@ -36,10 +36,13 @@ public class AudioDownloader {
         checkSaveDirectorySize();
 
         try {
+
             String[] ytdlpArgs = {YTDLPDownloader.YTDLP_LOCATION,
                     youtubeURL,
                     "-x",
                     "--no-progress",
+                    "--js-runtimes",
+                    "deno:" + DenoDownloader.DENO_LOCATION,
                     "--no-playlist",
                     "--no-keep-video",
                     "--break-match-filter",

@@ -16,7 +16,7 @@ public class YTDLPDownloader {
 
     private static String YTDLP_FILE_NAME = "yt-dlp";
     private static String REPOSITORY_FILE = "";
-    private static final String REPOSITORY = "https://github.com/yt-dlp/yt-dlp/releases/download/2026.08.19/";
+    private static final String REPOSITORY = "https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/";
     private static File OUTPUT_EXE;
     public static String YTDLP_LOCATION = "";
 
