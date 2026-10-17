@@ -41,6 +41,8 @@ public class AudioDownloader {
                     youtubeURL,
                     "-x",
                     "--no-progress",
+                    "--js-runtimes",
+                    "deno:" + DenoDownloader.DENO_LOCATION,
                     "--no-playlist",
                     "--no-keep-video",
                     "--break-match-filter",
