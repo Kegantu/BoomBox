@@ -11,29 +11,27 @@ import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MovementType;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.tag.FluidTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.stat.Stats;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.stats.Stats;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 import java.util.Optional;
@@ -41,57 +39,57 @@ import java.util.UUID;
 
 public class BoomBoxEntity extends Entity {
 
-    private static final TrackedData<Optional<Text>> MUSIC_UUID = DataTracker.registerData(BoomBoxEntity.class, TrackedDataHandlerRegistry.OPTIONAL_TEXT_COMPONENT);
-    private static final TrackedData<Float> VOLUME = DataTracker.registerData(BoomBoxEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    private static final EntityDataAccessor<Optional<Component>> MUSIC_UUID = SynchedEntityData.defineId(BoomBoxEntity.class, EntityDataSerializers.OPTIONAL_COMPONENT);
+    private static final EntityDataAccessor<Float> VOLUME = SynchedEntityData.defineId(BoomBoxEntity.class, EntityDataSerializers.FLOAT);
     private static Sound MUSIC;
     private int timePassed;
 
-    public BoomBoxEntity(EntityType<?> type, World world) {
+    public BoomBoxEntity(EntityType<?> type, Level world) {
         super(type, world);
     }
 
-    public BoomBoxEntity(World world, Vec3d position) {
+    public BoomBoxEntity(Level world, Vec3 position) {
         super(ModEntities.BOOMBOX_ENTITY, world);
-        this.setPosition(position);
-        this.lastX = position.x;
-        this.lastY = position.y;
-        this.lastZ = position.z;
+        this.setPos(position);
+        this.xo = position.x;
+        this.yo = position.y;
+        this.zo = position.z;
     }
 
-    public BoomBoxEntity(World world, Vec3d position, UUID musicUUID) {
+    public BoomBoxEntity(Level world, Vec3 position, UUID musicUUID) {
         super(ModEntities.BOOMBOX_ENTITY, world);
-        this.setPosition(position);
-        this.lastX = position.x;
-        this.lastY = position.y;
-        this.lastZ = position.z;
-        this.dataTracker.set(MUSIC_UUID, Optional.of(Text.of(musicUUID)));
-        this.dataTracker.set(VOLUME, 1f);
+        this.setPos(position);
+        this.xo = position.x;
+        this.yo = position.y;
+        this.zo = position.z;
+        this.entityData.set(MUSIC_UUID, Optional.of(Component.translationArg(musicUUID)));
+        this.entityData.set(VOLUME, 1f);
     }
 
-    public BoomBoxEntity(World world, Vec3d position, UUID musicUUID, float volume) {
+    public BoomBoxEntity(Level world, Vec3 position, UUID musicUUID, float volume) {
         super(ModEntities.BOOMBOX_ENTITY, world);
-        this.setPosition(position);
-        this.lastX = position.x;
-        this.lastY = position.y;
-        this.lastZ = position.z;
-        this.dataTracker.set(MUSIC_UUID, Optional.of(Text.of(musicUUID)));
-        this.dataTracker.set(VOLUME, volume);
+        this.setPos(position);
+        this.xo = position.x;
+        this.yo = position.y;
+        this.zo = position.z;
+        this.entityData.set(MUSIC_UUID, Optional.of(Component.translationArg(musicUUID)));
+        this.entityData.set(VOLUME, volume);
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(MUSIC_UUID, Optional.empty());
-        builder.add(VOLUME, 1f);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(MUSIC_UUID, Optional.empty());
+        builder.define(VOLUME, 1f);
     }
 
     @Override
-    protected void readCustomData(ReadView view) {
-        this.dataTracker.set(VOLUME, view.getFloat("Volume", 1f));
+    protected void readAdditionalSaveData(ValueInput view) {
+        this.entityData.set(VOLUME, view.getFloatOr("Volume", 1f));
     }
 
     @Override
-    protected void writeCustomData(WriteView view) {
-        view.putFloat("Volume", this.dataTracker.get(VOLUME));
+    protected void addAdditionalSaveData(ValueOutput view) {
+        view.putFloat("Volume", this.entityData.get(VOLUME));
     }
 
     @Override
@@ -99,49 +97,49 @@ public class BoomBoxEntity extends Entity {
         super.tick();
         this.timePassed++;
 
-        this.lastX = this.getX();
-        this.lastY = this.getY();
-        this.lastZ = this.getZ();
-        Vec3d vec3d = this.getVelocity();
-        float f = this.getStandingEyeHeight() - 0.11111111F;
-        if (this.isTouchingWater() && this.getFluidHeight(FluidTags.WATER) > f) {
+        this.xo = this.getX();
+        this.yo = this.getY();
+        this.zo = this.getZ();
+        Vec3 vec3d = this.getDeltaMovement();
+        float f = this.getEyeHeight() - 0.11111111F;
+        if (this.isInWater() && this.getFluidHeight(FluidTags.WATER) > f) {
             this.applyWaterBuoyancy();
         } else if (this.isInLava() && this.getFluidHeight(FluidTags.LAVA) > f) {
             this.applyLavaBuoyancy();
-        } else if (!this.hasNoGravity()) {
-            this.setVelocity(this.getVelocity().add(0.0, -0.04, 0.0));
+        } else if (!this.isNoGravity()) {
+            this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
         }
 
-        if (this.getEntityWorld().isClient()) {
-            this.noClip = false;
+        if (this.level().isClientSide()) {
+            this.noPhysics = false;
         } else {
-            this.noClip = !this.getEntityWorld().isSpaceEmpty(this, this.getBoundingBox().contract(1.0E-7));
-            if (this.noClip) {
-                this.pushOutOfBlocks(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
+            this.noPhysics = !this.level().noCollision(this, this.getBoundingBox().deflate(1.0E-7));
+            if (this.noPhysics) {
+                this.moveTowardsClosestSpace(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
             }
         }
 
-        if (!this.isOnGround() || this.getVelocity().horizontalLengthSquared() > 1.0E-5F || (this.age + this.getId()) % 4 == 0) {
-            this.move(MovementType.SELF, this.getVelocity());
+        if (!this.onGround() || this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-5F || (this.tickCount + this.getId()) % 4 == 0) {
+            this.move(MoverType.SELF, this.getDeltaMovement());
             float g = 0.98F;
-            if (this.isOnGround()) {
-                g = this.getEntityWorld().getBlockState(this.getVelocityAffectingPos()).getBlock().getSlipperiness() * 0.98F;
+            if (this.onGround()) {
+                g = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.98F;
             }
 
-            this.setVelocity(this.getVelocity().multiply(g, 0.98, g));
-            if (this.isOnGround()) {
-                Vec3d vec3d2 = this.getVelocity();
+            this.setDeltaMovement(this.getDeltaMovement().multiply(g, 0.98, g));
+            if (this.onGround()) {
+                Vec3 vec3d2 = this.getDeltaMovement();
                 if (vec3d2.y < 0.0) {
-                    this.setVelocity(vec3d2.multiply(1.0, -0.5, 1.0));
+                    this.setDeltaMovement(vec3d2.multiply(1.0, -0.5, 1.0));
                 }
             }
         }
 
-        this.velocityDirty = this.velocityDirty | this.updateWaterState();
-        if (!this.getEntityWorld().isClient()) {
-            double d = this.getVelocity().subtract(vec3d).lengthSquared();
+        this.needsSync = this.needsSync | this.updateInWaterStateAndDoFluidPushing();
+        if (!this.level().isClientSide()) {
+            double d = this.getDeltaMovement().subtract(vec3d).lengthSqr();
             if (d > 0.01) {
-                this.velocityDirty = true;
+                this.needsSync = true;
             }
         }
 
@@ -154,61 +152,61 @@ public class BoomBoxEntity extends Entity {
         }
 
         this.timePassed = 0;
-        if (this.getEntityWorld() instanceof ServerWorld serverWorld){
-            serverWorld.spawnParticles(ModParticles.BOOMBOX_NOTE, this.getX(), this.getY() + 0.25f, this.getZ(), 1, 0f,0f,0f, 0f);
+        if (this.level() instanceof ServerLevel serverWorld){
+            serverWorld.sendParticles(ModParticles.BOOMBOX_NOTE, this.getX(), this.getY() + 0.25f, this.getZ(), 1, 0f,0f,0f, 0f);
         }
     }
 
     @Override
-    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+    public boolean hurtServer(ServerLevel world, DamageSource source, float amount) {
         return false;
     }
 
     private void applyWaterBuoyancy() {
-        Vec3d vec3d = this.getVelocity();
-        this.setVelocity(vec3d.x * 0.99F, vec3d.y + (vec3d.y < 0.06F ? 5.0E-4F : 0.0F), vec3d.z * 0.99F);
+        Vec3 vec3d = this.getDeltaMovement();
+        this.setDeltaMovement(vec3d.x * 0.99F, vec3d.y + (vec3d.y < 0.06F ? 5.0E-4F : 0.0F), vec3d.z * 0.99F);
     }
 
     private void applyLavaBuoyancy() {
-        Vec3d vec3d = this.getVelocity();
-        this.setVelocity(vec3d.x * 0.95F, vec3d.y + (vec3d.y < 0.06F ? 5.0E-4F : 0.0F), vec3d.z * 0.95F);
+        Vec3 vec3d = this.getDeltaMovement();
+        this.setDeltaMovement(vec3d.x * 0.95F, vec3d.y + (vec3d.y < 0.06F ? 5.0E-4F : 0.0F), vec3d.z * 0.95F);
     }
 
     @Override
-    public ActionResult interact(PlayerEntity player, Hand hand) {
-        if (this.getEntityWorld().isClient()){
-            if (player.isSneaking()){
-                MinecraftClient.getInstance().setScreen(new BoomboxScreen(Text.literal("Boombox Screen"), this));
-                return ActionResult.SUCCESS;
+    public InteractionResult interact(Player player, InteractionHand hand) {
+        if (this.level().isClientSide()){
+            if (player.isShiftKeyDown()){
+                Minecraft.getInstance().setScreen(new BoomboxScreen(Component.literal("Boombox Screen"), this));
+                return InteractionResult.SUCCESS;
             }
         }
 
-        if (!this.getEntityWorld().isClient()) {
-            if (!player.isSneaking()){
-                if (this.dataTracker.get(MUSIC_UUID).isPresent() && !this.isPlaying()){
-                    return ActionResult.PASS;
+        if (!this.level().isClientSide()) {
+            if (!player.isShiftKeyDown()){
+                if (this.entityData.get(MUSIC_UUID).isPresent() && !this.isPlaying()){
+                    return InteractionResult.PASS;
                 }
                 ItemStack itemStack = new ItemStack(ModItems.BOOMBOX);
-                if (this.dataTracker.get(MUSIC_UUID).isPresent()){
-                    itemStack.set(ModComponents.BOOMBOX_COMPONENT, new BoomboxComponentDataType(this.dataTracker.get(MUSIC_UUID).get().getLiteralString(), this.dataTracker.get(VOLUME)));
+                if (this.entityData.get(MUSIC_UUID).isPresent()){
+                    itemStack.set(ModComponents.BOOMBOX_COMPONENT, new BoomboxComponentDataType(this.entityData.get(MUSIC_UUID).get().tryCollapseToString(), this.entityData.get(VOLUME)));
                 }
                 Item item = itemStack.getItem();
                 int i = itemStack.getCount();
-                if (player.getMainHandStack().isEmpty()){
-                    if (!player.getInventory().insertStack(itemStack)) {
-                        return ActionResult.PASS;
+                if (player.getMainHandItem().isEmpty()){
+                    if (!player.getInventory().add(itemStack)) {
+                        return InteractionResult.PASS;
                     }
                 } else {
-                    if (!player.getInventory().insertStack(40, itemStack)) {
-                        return ActionResult.PASS;
+                    if (!player.getInventory().add(40, itemStack)) {
+                        return InteractionResult.PASS;
                     }
                 }
 
-                player.sendPickup(this, i);
+                player.take(this, i);
 
-                player.increaseStat(Stats.PICKED_UP.getOrCreateStat(item), i);
+                player.awardStat(Stats.ITEM_PICKED_UP.get(item), i);
                 if (MUSIC != null){
-                    MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().getLiteralString());
+                    MusicManager.getSound(this.entityData.get(MUSIC_UUID).get().tryCollapseToString());
                     MusicManager.remove(MUSIC);
                 }
                 this.discard();
@@ -216,68 +214,68 @@ public class BoomBoxEntity extends Entity {
             //player.triggerItemPickedUpByEntityCriteria(this);
         }
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public boolean canHit() {
+    public boolean isPickable() {
         return true;
     }
 
     public void downloadMusic(String youtubeLink, double volume, UUID musicOwner){
 
-        if (this.dataTracker.get(MUSIC_UUID).isPresent()){
-            BoomboxStopC2SPayload payload = new BoomboxStopC2SPayload(this.dataTracker.get(MUSIC_UUID).get().getLiteralString());
+        if (this.entityData.get(MUSIC_UUID).isPresent()){
+            BoomboxStopC2SPayload payload = new BoomboxStopC2SPayload(this.entityData.get(MUSIC_UUID).get().tryCollapseToString());
             ClientPlayNetworking.send(payload);
 
-            if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().getLiteralString()) == null){
-                MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().getLiteralString()).stop();
-                MusicManager.remove(this.dataTracker.get(MUSIC_UUID).get().getLiteralString());
+            if (MusicManager.getSound(this.entityData.get(MUSIC_UUID).get().tryCollapseToString()) == null){
+                MusicManager.getSound(this.entityData.get(MUSIC_UUID).get().tryCollapseToString()).stop();
+                MusicManager.remove(this.entityData.get(MUSIC_UUID).get().tryCollapseToString());
             }
         }
 
-        BoomboxPlayC2SPayload payload = new BoomboxPlayC2SPayload(youtubeLink, this.dataTracker.get(VOLUME),
+        BoomboxPlayC2SPayload payload = new BoomboxPlayC2SPayload(youtubeLink, this.entityData.get(VOLUME),
                 new Vector3f((float) this.getX(), (float) this.getY(), (float) this.getZ()), UUID.randomUUID().toString(), this.getId(), musicOwner.toString());
 
         ClientPlayNetworking.send(payload);
     }
 
     public void setMusicUUID(UUID uuid){
-        this.dataTracker.set(MUSIC_UUID, Optional.of(Text.of(uuid)));
+        this.entityData.set(MUSIC_UUID, Optional.of(Component.translationArg(uuid)));
     }
 
     public void setVolumeClient(float volume){
-        this.dataTracker.set(VOLUME, volume);
+        this.entityData.set(VOLUME, volume);
 
-        if (this.dataTracker.get(MUSIC_UUID).isEmpty()){
+        if (this.entityData.get(MUSIC_UUID).isEmpty()){
             return;
         }
 
-        if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().getLiteralString()) == null){
+        if (MusicManager.getSound(this.entityData.get(MUSIC_UUID).get().tryCollapseToString()) == null){
             return;
         }
 
-        UpdateVolumeC2SPayload payload = new UpdateVolumeC2SPayload(volume, this.getId(), this.dataTracker.get(MUSIC_UUID).get().getLiteralString());
+        UpdateVolumeC2SPayload payload = new UpdateVolumeC2SPayload(volume, this.getId(), this.entityData.get(MUSIC_UUID).get().tryCollapseToString());
         ClientPlayNetworking.send(payload);
     }
 
     public void setVolumeServer(float volume){
-        this.dataTracker.set(VOLUME, volume);
+        this.entityData.set(VOLUME, volume);
     }
 
     public float getVolume(){
-        return this.dataTracker.get(VOLUME);
+        return this.entityData.get(VOLUME);
     }
 
     public boolean isPlaying(){
-        if (this.dataTracker.get(MUSIC_UUID).isEmpty()){
+        if (this.entityData.get(MUSIC_UUID).isEmpty()){
             return false;
         }
 
-        if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().getLiteralString()) == null){
+        if (MusicManager.getSound(this.entityData.get(MUSIC_UUID).get().tryCollapseToString()) == null){
             return false;
         }
 
-        return MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().getLiteralString()).isPlaying();
+        return MusicManager.getSound(this.entityData.get(MUSIC_UUID).get().tryCollapseToString()).isPlaying();
     }
 }

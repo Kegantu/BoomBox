@@ -1,28 +1,28 @@
 package me.kegantu.boombox.networking.payloads.C2S;
 
 import me.kegantu.boombox.BoomBox;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 
-public record UpdateVolumeC2SPayload(float volume, int entityID, String musicUUID) implements CustomPayload {
+public record UpdateVolumeC2SPayload(float volume, int entityID, String musicUUID) implements CustomPacketPayload {
 
-    public static final Identifier UPDATE_VOLUME_C2S_ID = Identifier.of(BoomBox.MOD_ID, "update_volume_server");
-    public static final CustomPayload.Id<UpdateVolumeC2SPayload> ID = new CustomPayload.Id<>(UPDATE_VOLUME_C2S_ID);
-    public static final PacketCodec<RegistryByteBuf, UpdateVolumeC2SPayload> CODEC = PacketCodec.tuple(
-            PacketCodecs.FLOAT,
+    public static final Identifier UPDATE_VOLUME_C2S_ID = Identifier.fromNamespaceAndPath(BoomBox.MOD_ID, "update_volume_server");
+    public static final CustomPacketPayload.Type<UpdateVolumeC2SPayload> ID = new CustomPacketPayload.Type<>(UPDATE_VOLUME_C2S_ID);
+    public static final StreamCodec<RegistryFriendlyByteBuf, UpdateVolumeC2SPayload> CODEC = StreamCodec.composite(
+            ByteBufCodecs.FLOAT,
             UpdateVolumeC2SPayload::volume,
-            PacketCodecs.INTEGER,
+            ByteBufCodecs.INT,
             UpdateVolumeC2SPayload::entityID,
-            PacketCodecs.STRING,
+            ByteBufCodecs.STRING_UTF8,
             UpdateVolumeC2SPayload::musicUUID,
             UpdateVolumeC2SPayload::new
     );
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

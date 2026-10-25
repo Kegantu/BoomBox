@@ -1,7 +1,7 @@
 package me.kegantu.boombox.soundsystem;
 
 import me.kegantu.boombox.BoomBox;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
@@ -20,7 +20,7 @@ public class Sound {
     private int soundSourceID;
     private float volume;
 
-    public Sound(Path soundPath, Vec3d position, double volume, UUID uuid){
+    public Sound(Path soundPath, Vec3 position, double volume, UUID uuid){
         MusicManager.addMusic(uuid.toString(), this);
         this.volume = (float) volume;
 
@@ -67,7 +67,7 @@ public class Sound {
         AL10.alSourcef(soundSourceID, AL10.AL_GAIN, this.volume);
     }
 
-    public Sound(Path soundPath, Vec3d position, double volume, UUID uuid, float playback){
+    public Sound(Path soundPath, Vec3 position, double volume, UUID uuid, float playback){
         this(soundPath, position, volume, uuid);
         AL10.alSourcef(soundSourceID, AL11.AL_SEC_OFFSET, playback);
     }

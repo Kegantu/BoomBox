@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin {
 
-    @Inject(method = "stop", at = @At("HEAD"))
+    @Inject(method = "halt", at = @At("HEAD"))
     private void cleanServerMusicManager(boolean waitForShutdown, CallbackInfo ci){
         ServerMusicManager.clearServerSounds();
     }

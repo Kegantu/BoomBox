@@ -17,13 +17,10 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import oshi.util.tuples.Triplet;
 
@@ -46,13 +43,13 @@ public class ModPackets {
             String musicUUID = payload.musicUUID();
             int entityId = payload.entityID();
 
-            BoomBoxEntity entity = (BoomBoxEntity) context.player().getEntityWorld().getEntityById(entityId);
+            BoomBoxEntity entity = (BoomBoxEntity) context.player().level().getEntity(entityId);
             entity.setMusicUUID(UUID.fromString(musicUUID));
             BoomboxPlayS2CPayload payloadClient = new BoomboxPlayS2CPayload(url, volume, soundPos, musicUUID, payload.musicOwnerUUID());
 
             ServerMusicManager.addMusicURL(musicUUID, new Triplet<>(url, soundPos, volume));
 
-            for (ServerPlayerEntity playerEntity : context.server().getPlayerManager().getPlayerList()){
+            for (ServerPlayer playerEntity : context.server().getPlayerList().getPlayers()){
                 ServerPlayNetworking.send(playerEntity, payloadClient);
             }
         });
@@ -64,7 +61,7 @@ public class ModPackets {
 
             ServerMusicManager.remove(uuid);
 
-            for (ServerPlayerEntity playerEntity : context.server().getPlayerManager().getPlayerList()){
+            for (ServerPlayer playerEntity : context.server().getPlayerList().getPlayers()){
                 ServerPlayNetworking.send(playerEntity, payloadClient);
             }
         });
@@ -72,7 +69,7 @@ public class ModPackets {
         ServerPlayNetworking.registerGlobalReceiver(SoundPositionUpdateC2SPayload.ID, (payload, context) -> {
             SoundPositionUpdateS2CPayload payloadClient = new SoundPositionUpdateS2CPayload(payload.position(), payload.musicUUID());
 
-            for (ServerPlayerEntity playerEntity : context.server().getPlayerManager().getPlayerList()){
+            for (ServerPlayer playerEntity : context.server().getPlayerList().getPlayers()){
                 ServerPlayNetworking.send(playerEntity, payloadClient);
             }
         });
@@ -83,9 +80,9 @@ public class ModPackets {
 
             UpdateVolumeS2CPayload payloadClient = new UpdateVolumeS2CPayload(volume, payload.musicUUID());
 
-            BoomBoxEntity entity = (BoomBoxEntity) context.player().getEntityWorld().getEntityById(entityId);
+            BoomBoxEntity entity = (BoomBoxEntity) context.player().level().getEntity(entityId);
             entity.setVolumeServer(volume);
-            for (ServerPlayerEntity playerEntity : context.server().getPlayerManager().getPlayerList()){
+            for (ServerPlayer playerEntity : context.server().getPlayerList().getPlayers()){
                 ServerPlayNetworking.send(playerEntity, payloadClient);
             }
         });
@@ -101,21 +98,21 @@ public class ModPackets {
         ClientPlayNetworking.registerGlobalReceiver(BoomboxPlayS2CPayload.ID, (payload, context) -> {
             String youtubeLink = payload.url();
             float volume = payload.volume();
-            Vec3d position = new Vec3d(payload.position());
+            Vec3 position = new Vec3(payload.position());
             String uuid = payload.musicUUID();
             String musicOwner = payload.musicOwnerUUID();
 
             CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink, uuid));
             futureFfmpeg.whenComplete((path, exception) -> {
                 BoomBox.LOGGER.info(exception != null ? exception.toString() : "ok");
-                if (exception != null && context.player().squaredDistanceTo(position) <= 32 * 32 && context.player().getUuid() == UUID.fromString(musicOwner)) {
-                    context.player().sendMessage(Text.literal("Failed To Download an Audio").formatted(Formatting.RED), true);
+                if (exception != null && context.player().distanceToSqr(position) <= 32 * 32 && context.player().getUUID() == UUID.fromString(musicOwner)) {
+                    context.player().displayClientMessage(Component.literal("Failed To Download an Audio").withStyle(ChatFormatting.RED), true);
                     return;
                 }
 
                 playMusic(path, volume, position, UUID.fromString(uuid));
-                if (context.player().squaredDistanceTo(position) <= 32 * 32){
-                    context.client().getToastManager().add(new NotificationToast(YoutubeUtils.getTitle(youtubeLink)));
+                if (context.player().distanceToSqr(position) <= 32 * 32){
+                    context.client().getToastManager().addToast(new NotificationToast(YoutubeUtils.getTitle(youtubeLink)));
                 }
             });
         });
@@ -131,7 +128,6 @@ public class ModPackets {
 
         ClientPlayNetworking.registerGlobalReceiver(SoundPositionUpdateS2CPayload.ID, (payload, context) -> {
             Vector3f position = new Vector3f(payload.position());
-            BoomBox.LOGGER.info(position.toString());
             String musicUUID = payload.musicUUID();
 
             if (MusicManager.getSound(musicUUID) == null){
@@ -144,7 +140,7 @@ public class ModPackets {
         ClientPlayNetworking.registerGlobalReceiver(BoomboxOnJoinSyncS2CPayload.ID, (payload, context) -> {
             String youtubeLink = payload.url();
             float volume = payload.volume();
-            Vec3d position = new Vec3d(payload.position());
+            Vec3 position = new Vec3(payload.position());
             String uuid = payload.musicUUID();
             float playback = payload.playback();
 
@@ -152,8 +148,8 @@ public class ModPackets {
             futureFfmpeg.whenComplete((path, exception) -> {
                 BoomBox.LOGGER.info(exception != null ? exception.toString() : "ok");
                 playMusic(path, volume, position, UUID.fromString(uuid), playback);
-                if (context.player().squaredDistanceTo(position) <= 32 * 32){
-                    context.client().getToastManager().add(new NotificationToast(YoutubeUtils.getTitle(youtubeLink)));
+                if (context.player().distanceToSqr(position) <= 32 * 32){
+                    context.client().getToastManager().addToast(new NotificationToast(YoutubeUtils.getTitle(youtubeLink)));
                 }
             });
         });
@@ -170,12 +166,12 @@ public class ModPackets {
         });
     }
 
-    private static void playMusic(Path output, float volume, Vec3d position, UUID uuid){
+    private static void playMusic(Path output, float volume, Vec3 position, UUID uuid){
         Sound music = new Sound(output, position, volume, uuid);
         music.play();
     }
 
-    private static void playMusic(Path output, float volume, Vec3d position, UUID uuid, float playback){
+    private static void playMusic(Path output, float volume, Vec3 position, UUID uuid, float playback){
         Sound music = new Sound(output, position, volume, uuid, playback);
         music.play();
     }

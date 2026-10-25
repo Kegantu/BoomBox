@@ -2,10 +2,13 @@ package me.kegantu.boombox.mixin.client;
 
 import me.kegantu.boombox.init.ModComponents;
 import me.kegantu.boombox.init.ModItems;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.entity.model.*;
-import net.minecraft.client.render.entity.state.BipedEntityRenderState;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.model.ArmedModel;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.HeadedModel;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -13,8 +16,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(BipedEntityModel.class)
-public abstract class BipedEntityModelMixin <T extends BipedEntityRenderState> extends EntityModel<T> implements ModelWithArms, ModelWithHead {
+@Mixin(HumanoidModel.class)
+public abstract class BipedEntityModelMixin <T extends HumanoidRenderState> extends EntityModel<T> implements ArmedModel, HeadedModel {
 
     @Shadow @Final public ModelPart rightArm;
 
@@ -26,11 +29,11 @@ public abstract class BipedEntityModelMixin <T extends BipedEntityRenderState> e
         super(root);
     }
 
-    @Inject(method = "positionLeftArm", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "poseLeftArm", at = @At("HEAD"), cancellable = true)
     private void positionLeftArm(T state, CallbackInfo ci){
-        ItemStack itemStack = state.leftHandItem;
+        ItemStack itemStack = state.leftHandItemStack;
 
-        if (!itemStack.isOf(ModItems.BOOMBOX)){
+        if (!itemStack.is(ModItems.BOOMBOX)){
             return;
         }
 
@@ -38,23 +41,23 @@ public abstract class BipedEntityModelMixin <T extends BipedEntityRenderState> e
             return;
         }
 
-        this.leftArm.pitch = 0;
-        this.leftArm.yaw = 0;
-        this.leftArm.roll = (float) Math.PI + 0.6f;
+        this.leftArm.xRot = 0;
+        this.leftArm.yRot = 0;
+        this.leftArm.zRot = (float) Math.PI + 0.6f;
 
-        if(state.isInSneakingPose){
-            this.leftArm.pitch -= 1.0F;
-            this.leftArm.originY = 5.2F;
+        if(state.isCrouching){
+            this.leftArm.xRot -= 1.0F;
+            this.leftArm.y = 5.2F;
         }
 
         ci.cancel();
     }
 
-    @Inject(method = "positionRightArm", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "poseRightArm", at = @At("HEAD"), cancellable = true)
     private void positionRightArm(T state, CallbackInfo ci){
         ItemStack itemStack = state.getMainHandItemStack();
 
-        if (!itemStack.isOf(ModItems.BOOMBOX)){
+        if (!itemStack.is(ModItems.BOOMBOX)){
             return;
         }
 
@@ -62,13 +65,13 @@ public abstract class BipedEntityModelMixin <T extends BipedEntityRenderState> e
             return;
         }
 
-        this.rightArm.pitch = 0;
-        this.rightArm.yaw = 0;
-        this.rightArm.roll = 2.5f;
+        this.rightArm.xRot = 0;
+        this.rightArm.yRot = 0;
+        this.rightArm.zRot = 2.5f;
 
-        if(state.isInSneakingPose){
-            this.rightArm.pitch -= 1.0F;
-            this.rightArm.originY = 5.2F;
+        if(state.isCrouching){
+            this.rightArm.xRot -= 1.0F;
+            this.rightArm.y = 5.2F;
         }
 
         ci.cancel();

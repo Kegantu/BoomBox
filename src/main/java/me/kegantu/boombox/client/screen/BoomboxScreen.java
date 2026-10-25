@@ -7,83 +7,82 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.option.SimpleOption;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.OptionInstance;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(EnvType.CLIENT)
 public class BoomboxScreen extends Screen {
-    private ButtonWidget confirm;
-    private ButtonWidget back;
-    private TextFieldWidget musicLink;
-    private SimpleOption<Double> boomboxVolume;
+    private Button confirm;
+    private Button back;
+    private EditBox musicLink;
+    private OptionInstance<Double> boomboxVolume;
 
     private String youtubeLink = "";
     private double volume = 1d;
     private BoomBoxEntity entity;
 
-    public BoomboxScreen(Text title, BoomBoxEntity entity) {
+    public BoomboxScreen(Component title, BoomBoxEntity entity) {
         super(title);
         this.entity = entity;
     }
 
     @Override
     protected void init() {
-        confirm = ButtonWidget.builder(Text.literal("Update Link"), button -> {
+        confirm = Button.builder(Component.literal("Update Link"), button -> {
             if (youtubeLink.isEmpty()){
-                this.client.player.sendMessage(Text.literal("Please put your youtube link"), true);
-                this.client.setScreen(null);
+                this.minecraft.player.displayClientMessage(Component.literal("Please put your youtube link"), true);
+                this.minecraft.setScreen(null);
                 return;
             }
 
-            entity.downloadMusic(youtubeLink, volume, client.player.getUuid());
-            this.client.player.sendMessage(Text.literal("Downloading an audio..."), true);
-            this.client.setScreen(null);
-        }).dimensions((this.width + 46) / 2, this.height / 4 + 110, 130, 20).build();
-        back = ButtonWidget.builder(Text.literal("Back"), button -> {
-                    this.client.setScreen(null);
-                }).dimensions((this.width - 301) / 2, this.height / 4 + 110, 130, 20).build();
+            entity.downloadMusic(youtubeLink, volume, minecraft.player.getUUID());
+            this.minecraft.player.displayClientMessage(Component.literal("Downloading an audio..."), true);
+            this.minecraft.setScreen(null);
+        }).bounds((this.width + 46) / 2, this.height / 4 + 110, 130, 20).build();
+        back = Button.builder(Component.literal("Back"), button -> {
+                    this.minecraft.setScreen(null);
+                }).bounds((this.width - 301) / 2, this.height / 4 + 110, 130, 20).build();
 
-        musicLink = new TextFieldWidget(this.textRenderer, (this.width - 300) / 2, this.height / 4 + 60, 300, 20, Text.literal("Paste link here"));
+        musicLink = new EditBox(this.font, (this.width - 300) / 2, this.height / 4 + 60, 300, 20, Component.literal("Paste link here"));
         musicLink.setMaxLength(128);
-        musicLink.setChangedListener(s -> {
+        musicLink.setResponder(s -> {
             youtubeLink = s;
         });
-        boomboxVolume = new SimpleOption<Double>("options.boombox.volume", SimpleOption.emptyTooltip(),
-                (optionText, value) -> value == 0.0 ? this.client.options.getGenericValueText(optionText, ScreenTexts.OFF) : this.getPercentValueText(optionText, value),
-                SimpleOption.DoubleSliderCallbacks.INSTANCE, 1d, aFloat -> {
+        boomboxVolume = new OptionInstance<Double>("options.boombox.volume", OptionInstance.noTooltip(),
+                (optionText, value) -> value == 0.0 ? this.minecraft.options.genericValueLabel(optionText, CommonComponents.OPTION_OFF) : this.getPercentValueText(optionText, value),
+                OptionInstance.UnitDouble.INSTANCE, 1d, aFloat -> {
             volume = aFloat;
             entity.setVolumeClient((float) volume);
         });
-        boomboxVolume.setValue(entity.getVolume() != 1.0 ? entity.getVolume() : 1.0d);
+        boomboxVolume.set(entity.getVolume() != 1.0 ? entity.getVolume() : 1.0d);
 
-        addDrawableChild(confirm);
-        addDrawableChild(back);
-        addDrawableChild(musicLink);
-        addDrawableChild(boomboxVolume.createWidget(this.client.options, (this.width - 300) / 2, this.height / 4 + 10, 300));
+        addRenderableWidget(confirm);
+        addRenderableWidget(back);
+        addRenderableWidget(musicLink);
+        addRenderableWidget(boomboxVolume.createButton(this.minecraft.options, (this.width - 300) / 2, this.height / 4 + 10, 300));
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         if (input.key() == GLFW.GLFW_KEY_ESCAPE)
-            MinecraftClient.getInstance().setScreen(null);
+            Minecraft.getInstance().setScreen(null);
         return super.keyPressed(input);
     }
 
-    private Text getPercentValueText(Text prefix, double value) {
-        return Text.translatable("options.percent_value", prefix, (int)(value * 100.0));
+    private Component getPercentValueText(Component prefix, double value) {
+        return Component.translatable("options.percent_value", prefix, (int)(value * 100.0));
     }
 }

@@ -5,13 +5,12 @@ import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
-import net.minecraft.block.Blocks;
-import net.minecraft.data.recipe.RecipeExporter;
-import net.minecraft.data.recipe.RecipeGenerator;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.book.RecipeCategory;
-import net.minecraft.registry.RegistryWrapper;
-
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import java.util.concurrent.CompletableFuture;
 
 public class BoomBoxDataGenerator implements DataGeneratorEntrypoint {
@@ -23,26 +22,26 @@ public class BoomBoxDataGenerator implements DataGeneratorEntrypoint {
 	}
 
 	private static class BoomBoxRecipeGenerator extends FabricRecipeProvider {
-        public BoomBoxRecipeGenerator(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
+        public BoomBoxRecipeGenerator(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
             super(output, registriesFuture);
         }
 
 		@Override
-		protected RecipeGenerator getRecipeGenerator(RegistryWrapper.WrapperLookup registries, RecipeExporter exporter) {
-			return new RecipeGenerator(registries, exporter) {
+		protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput exporter) {
+			return new RecipeProvider(registries, exporter) {
 				@Override
-				public void generate() {
-					createShaped(RecipeCategory.MISC, ModItems.BOOMBOX)
+				public void buildRecipes() {
+					shaped(RecipeCategory.MISC, ModItems.BOOMBOX)
 							.pattern(" r ")
 							.pattern("njn")
 							.pattern("iii")
-							.input('r', Items.REDSTONE_BLOCK)
-							.input('n', Blocks.NOTE_BLOCK)
-							.input('j', Blocks.JUKEBOX)
-							.input('i', Items.IRON_INGOT)
-							.criterion(hasItem(Blocks.NOTE_BLOCK.asItem()), conditionsFromItem(Blocks.NOTE_BLOCK.asItem()))
-							.criterion(hasItem(Blocks.JUKEBOX.asItem()), conditionsFromItem(Blocks.JUKEBOX.asItem()))
-							.offerTo(exporter);
+							.define('r', Items.REDSTONE_BLOCK)
+							.define('n', Blocks.NOTE_BLOCK)
+							.define('j', Blocks.JUKEBOX)
+							.define('i', Items.IRON_INGOT)
+							.unlockedBy(getHasName(Blocks.NOTE_BLOCK.asItem()), has(Blocks.NOTE_BLOCK.asItem()))
+							.unlockedBy(getHasName(Blocks.JUKEBOX.asItem()), has(Blocks.JUKEBOX.asItem()))
+							.save(output);
 				}
 			};
 		}

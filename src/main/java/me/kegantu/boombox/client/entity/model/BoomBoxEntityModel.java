@@ -7,10 +7,13 @@ package me.kegantu.boombox.client.entity.model;
 import me.kegantu.boombox.client.entity.renderstate.BoomBoxEntityRenderState;
 import me.kegantu.boombox.entity.BoomBoxEntity;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 
 public class BoomBoxEntityModel extends EntityModel<BoomBoxEntityRenderState> {
 	private final ModelPart root;
@@ -18,15 +21,15 @@ public class BoomBoxEntityModel extends EntityModel<BoomBoxEntityRenderState> {
 		super(root);
 		this.root = root.getChild("root");
 	}
-	public static TexturedModelData getTexturedModelData() {
-		ModelData modelData = new ModelData();
-		ModelPartData modelPartData = modelData.getRoot();
-		ModelPartData root = modelPartData.addChild("root", ModelPartBuilder.create().uv(0, 0).cuboid(-6.0F, -5.0F, -1.0F, 12.0F, 5.0F, 3.0F, new Dilation(0.0F))
-		.uv(0, 10).cuboid(2.0F, -4.0F, -1.5F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F))
-		.uv(8, 10).cuboid(-5.0F, -4.0F, -1.5F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F))
-		.uv(0, 14).cuboid(-4.0F, -7.0F, 0.0F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F))
-		.uv(0, 8).cuboid(-3.0F, -7.0F, 0.0F, 6.0F, 1.0F, 1.0F, new Dilation(0.0F))
-		.uv(4, 14).cuboid(3.0F, -7.0F, 0.0F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 24.0F, 0.0F));
-		return TexturedModelData.of(modelData, 32, 32);
+	public static LayerDefinition getTexturedModelData() {
+		MeshDefinition modelData = new MeshDefinition();
+		PartDefinition modelPartData = modelData.getRoot();
+		PartDefinition root = modelPartData.addOrReplaceChild("root", CubeListBuilder.create().texOffs(0, 0).addBox(-6.0F, -5.0F, -1.0F, 12.0F, 5.0F, 3.0F, new CubeDeformation(0.0F))
+		.texOffs(0, 10).addBox(2.0F, -4.0F, -1.5F, 3.0F, 3.0F, 1.0F, new CubeDeformation(0.0F))
+		.texOffs(8, 10).addBox(-5.0F, -4.0F, -1.5F, 3.0F, 3.0F, 1.0F, new CubeDeformation(0.0F))
+		.texOffs(0, 14).addBox(-4.0F, -7.0F, 0.0F, 1.0F, 2.0F, 1.0F, new CubeDeformation(0.0F))
+		.texOffs(0, 8).addBox(-3.0F, -7.0F, 0.0F, 6.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+		.texOffs(4, 14).addBox(3.0F, -7.0F, 0.0F, 1.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 24.0F, 0.0F));
+		return LayerDefinition.create(modelData, 32, 32);
 	}
 }

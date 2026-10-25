@@ -3,13 +3,12 @@ package me.kegantu.boombox.mixin.client;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
 import me.kegantu.boombox.utils.AudioDownloader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.GameMenuScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.option.GameOptionsScreen;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.option.GameOptions;
-import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
+import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.server.IntegratedServer;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,23 +19,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
-@Mixin(MinecraftClient.class)
+@Mixin(Minecraft.class)
 public abstract class MinecraftClientMixin {
 
-    @Shadow @Nullable public ClientPlayerEntity player;
-
-    @Shadow @Final public GameOptions options;
+    @Shadow @Nullable public LocalPlayer player;
 
     @Shadow
-    public abstract @org.jspecify.annotations.Nullable IntegratedServer getServer();
+    protected abstract boolean isMultiplayerServer();
 
     @Inject(method = "setScreen", at = @At(value = "HEAD"))
     private void pauseBoomboxAudio(Screen screen, CallbackInfo ci){
-        if (!(screen instanceof GameMenuScreen)){
+        if (!(screen instanceof PauseScreen)){
             return;
         }
 
-        if (this.getServer() == null){
+        if (this.isMultiplayerServer()){
             return;
         }
 
@@ -46,7 +43,7 @@ public abstract class MinecraftClientMixin {
         }
     }
 
-    @Inject(method = "setScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundManager;resumeAll()V", shift = At.Shift.AFTER))
+    @Inject(method = "setScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;resume()V", shift = At.Shift.AFTER))
     private void unpauseBoomboxAudio(Screen screen, CallbackInfo ci){
         List<Sound> music = MusicManager.getCurrentlyPlayingMusic();
         for (int i = 0; i < music.size(); i++) {
@@ -54,7 +51,7 @@ public abstract class MinecraftClientMixin {
         }
     }
 
-    @Inject(method = "setWorld(Lnet/minecraft/client/world/ClientWorld;Z)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundManager;stopAll()V", shift = At.Shift.AFTER))
+    @Inject(method = "updateLevelInEngines(Lnet/minecraft/client/multiplayer/ClientLevel;Z)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;stop()V", shift = At.Shift.AFTER))
     private void stopAllMusic(CallbackInfo ci){
         List<Sound> music = MusicManager.getCurrentlyPlayingMusic();
         for (int i = 0; i < music.size(); i++) {
@@ -67,7 +64,7 @@ public abstract class MinecraftClientMixin {
         AudioDownloader.cleanAllSaveDirectory();
     }
 
-    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;ZZ)V", at = @At("TAIL"))
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;ZZ)V", at = @At("TAIL"))
     private void onDisconnect(CallbackInfo ci){
         MusicManager.clearSounds();
     }

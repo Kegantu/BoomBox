@@ -4,13 +4,13 @@ import me.kegantu.boombox.entity.BoomBoxEntity;
 import me.kegantu.boombox.init.ModComponents;
 import me.kegantu.boombox.init.ModItems;
 import me.kegantu.boombox.item.components.BoomboxComponentDataType;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,10 +19,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.UUID;
 
-@Mixin(PlayerEntity.class)
+@Mixin(Player.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
 
-	protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
+	protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, Level world) {
 		super(entityType, world);
 	}
 
@@ -31,14 +31,14 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 		//AL10.alListener3f(AL10.AL_POSITION, (float) this.getX(), (float) getY(), (float) getZ());
 	}
 
-	@Inject(method = "closeHandledScreen", at = @At("HEAD"))
+	@Inject(method = "closeContainer", at = @At("HEAD"))
 	private void resetLastUsedChestBlockPos(CallbackInfo ci){
 		//BoomBox.lastUsedChestBlockPos = null;
 	}
 
-	@Inject(method = "dropItem", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "drop", at = @At("HEAD"), cancellable = true)
 	private void dropBoombox(ItemStack stack, boolean retainOwnership, CallbackInfoReturnable<ItemEntity> cir){
-		if (!stack.isOf(ModItems.BOOMBOX)){
+		if (!stack.is(ModItems.BOOMBOX)){
 			return;
 		}
 
@@ -49,16 +49,16 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 		BoomboxComponentDataType data = stack.get(ModComponents.BOOMBOX_COMPONENT);
 		String musicUUID = data.musicUUID();
 
-		if (this.getEntityWorld().isClient()) {
-			this.swingHand(Hand.MAIN_HAND);
+		if (this.level().isClientSide()) {
+			this.swing(InteractionHand.MAIN_HAND);
 			return;
 		}
 
-		BoomBoxEntity boomBoxEntity = new BoomBoxEntity(this.getEntityWorld(), this.getEntityPos(), UUID.fromString(musicUUID), data.volume());
+		BoomBoxEntity boomBoxEntity = new BoomBoxEntity(this.level(), this.position(), UUID.fromString(musicUUID), data.volume());
 		stack.set(ModComponents.BOOMBOX_COMPONENT, null);
-		stack.decrement(1);
-		boomBoxEntity.setYaw(this.getYaw());
-		this.getEntityWorld().spawnEntity(boomBoxEntity);
+		stack.shrink(1);
+		boomBoxEntity.setYRot(this.getYRot());
+		this.level().addFreshEntity(boomBoxEntity);
 		cir.cancel();
 	}
 }

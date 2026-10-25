@@ -2,39 +2,39 @@ package me.kegantu.boombox.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.particle.SimpleParticleType;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.RandomSource;
 import org.jspecify.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
-public class BoomBoxNoteParticle extends BillboardParticle {
+public class BoomBoxNoteParticle extends SingleQuadParticle {
 
-    public BoomBoxNoteParticle(ClientWorld clientWorld, double x, double y, double z, double xVelocity, double yVelocity, double zVelocity, Sprite sprite) {
+    public BoomBoxNoteParticle(ClientLevel clientWorld, double x, double y, double z, double xVelocity, double yVelocity, double zVelocity, TextureAtlasSprite sprite) {
         super(clientWorld, x, y, z, xVelocity, yVelocity, zVelocity, sprite);
         this.setSprite(sprite);
-        this.setVelocity(0f, 0.1f, 0f);
-        this.setMaxAge(20);
+        this.setParticleSpeed(0f, 0.1f, 0f);
+        this.setLifetime(20);
     }
 
     @Override
-    protected RenderType getRenderType() {
-        return BillboardParticle.RenderType.PARTICLE_ATLAS_OPAQUE;
+    protected Layer getLayer() {
+        return SingleQuadParticle.Layer.OPAQUE;
     }
 
     @Environment(EnvType.CLIENT)
-    public static class Factory implements ParticleFactory<SimpleParticleType> {
-        private final SpriteProvider spriteProvider;
+    public static class Factory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
 
-        public Factory(SpriteProvider spriteProvider) {
+        public Factory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
 
         @Override
-        public @Nullable Particle createParticle(SimpleParticleType parameters, ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ, Random random) {
-            return new BoomBoxNoteParticle(world, x, y, z, velocityX, velocityY, velocityZ, this.spriteProvider.getSprite(random));
+        public @Nullable Particle createParticle(SimpleParticleType parameters, ClientLevel world, double x, double y, double z, double velocityX, double velocityY, double velocityZ, RandomSource random) {
+            return new BoomBoxNoteParticle(world, x, y, z, velocityX, velocityY, velocityZ, this.spriteProvider.get(random));
         }
     }
 }

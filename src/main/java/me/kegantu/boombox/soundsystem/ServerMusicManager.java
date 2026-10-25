@@ -1,11 +1,11 @@
 package me.kegantu.boombox.soundsystem;
 
-import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3f;
 import oshi.util.tuples.Triplet;
 
 import java.util.Hashtable;
 import java.util.List;
+import net.minecraft.core.BlockPos;
 
 public class ServerMusicManager {
     private static final Hashtable<String, Triplet<String, Vector3f, Float>> CURRENTLY_PLAYING_MUSIC_SERVER = new Hashtable<>();

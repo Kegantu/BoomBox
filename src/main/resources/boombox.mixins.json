@@ -13,8 +13,7 @@
 	"client": [
 		"client.BipedEntityModelMixin",
 		"client.PlayerHeldItemFeatureRendererMixin",
-		"client.MinecraftClientMixin",
-		"client.ToastManagerEntryMixin"
+		"client.MinecraftClientMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
