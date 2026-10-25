@@ -18,11 +18,4 @@ public abstract class ToastManagerEntryMixin<T extends Toast> {
     @Shadow @Final private int topIndex;
 
     //@Shadow protected abstract float getDisappearProgress(long time);
-
-    @ModifyArg(method = "draw", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;translate(FFF)V"), index = 1)
-    private float customToastAdjustment(float x){
-        //long l = Util.getMeasuringTimeMs();
-        //instance.translate(x - this.getInstance().getWidth() * this.getDisappearProgress(l), (float)(this.topIndex * this.getInstance().getHeight()), 800.0F);
-        return x / 32 * this.getInstance().getHeight();
-    }
 }

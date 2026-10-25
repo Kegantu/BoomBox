@@ -9,10 +9,11 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.dynamic.Codecs;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.util.UUID;
 
-public record BoomboxPlayC2SPayload(String url, float volume, Vector3f position, String musicUUID, int entityID, String musicOwnerUUID) implements CustomPayload {
+public record BoomboxPlayC2SPayload(String url, float volume, Vector3fc position, String musicUUID, int entityID, String musicOwnerUUID) implements CustomPayload {
 
     public static final Identifier BOOMBOX_PLAY_C2S_ID = Identifier.of(BoomBox.MOD_ID, "boombox_play_server");
     public static final CustomPayload.Id<BoomboxPlayC2SPayload> ID = new CustomPayload.Id<>(BOOMBOX_PLAY_C2S_ID);

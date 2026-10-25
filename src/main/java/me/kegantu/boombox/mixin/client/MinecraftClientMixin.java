@@ -4,9 +4,12 @@ import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
 import me.kegantu.boombox.utils.AudioDownloader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.option.GameOptionsScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.GameOptions;
+import net.minecraft.server.integrated.IntegratedServer;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,14 +21,25 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(MinecraftClient.class)
-public class MinecraftClientMixin {
+public abstract class MinecraftClientMixin {
 
     @Shadow @Nullable public ClientPlayerEntity player;
 
     @Shadow @Final public GameOptions options;
 
-    @Inject(method = "openGameMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundManager;pauseAll()V", shift = At.Shift.AFTER))
-    private void pauseBoomboxAudio(boolean pause, CallbackInfo ci){
+    @Shadow
+    public abstract @org.jspecify.annotations.Nullable IntegratedServer getServer();
+
+    @Inject(method = "setScreen", at = @At(value = "HEAD"))
+    private void pauseBoomboxAudio(Screen screen, CallbackInfo ci){
+        if (!(screen instanceof GameMenuScreen)){
+            return;
+        }
+
+        if (this.getServer() == null){
+            return;
+        }
+
         List<Sound> music = MusicManager.getCurrentlyPlayingMusic();
         for (int i = 0; i < music.size(); i++) {
             music.get(i).pause();
@@ -40,7 +54,7 @@ public class MinecraftClientMixin {
         }
     }
 
-    @Inject(method = "reset", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundManager;stopAll()V", shift = At.Shift.AFTER))
+    @Inject(method = "setWorld(Lnet/minecraft/client/world/ClientWorld;Z)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundManager;stopAll()V", shift = At.Shift.AFTER))
     private void stopAllMusic(CallbackInfo ci){
         List<Sound> music = MusicManager.getCurrentlyPlayingMusic();
         for (int i = 0; i < music.size(); i++) {
@@ -53,7 +67,7 @@ public class MinecraftClientMixin {
         AudioDownloader.cleanAllSaveDirectory();
     }
 
-    @Inject(method = "disconnect()V", at = @At("TAIL"))
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;ZZ)V", at = @At("TAIL"))
     private void onDisconnect(CallbackInfo ci){
         MusicManager.clearSounds();
     }

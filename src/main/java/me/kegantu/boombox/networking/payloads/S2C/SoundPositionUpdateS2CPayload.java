@@ -8,8 +8,9 @@ import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
-public record SoundPositionUpdateS2CPayload(Vector3f position, String musicUUID) implements CustomPayload {
+public record SoundPositionUpdateS2CPayload(Vector3fc position, String musicUUID) implements CustomPayload {
 
     public static final Identifier SOUND_POSITION_UPDATE_S2C_ID = Identifier.of(BoomBox.MOD_ID, "sound_position_update_client");
     public static final CustomPayload.Id<SoundPositionUpdateS2CPayload> ID = new CustomPayload.Id<>(SOUND_POSITION_UPDATE_S2C_ID);

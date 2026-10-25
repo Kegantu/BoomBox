@@ -36,8 +36,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 		//BoomBox.lastUsedChestBlockPos = null;
 	}
 
-	@Inject(method = "dropItem(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/ItemEntity;", at = @At("HEAD"), cancellable = true)
-	private void dropBoombox(ItemStack stack, boolean throwRandomly, boolean retainOwnership, CallbackInfoReturnable<ItemEntity> cir){
+	@Inject(method = "dropItem", at = @At("HEAD"), cancellable = true)
+	private void dropBoombox(ItemStack stack, boolean retainOwnership, CallbackInfoReturnable<ItemEntity> cir){
 		if (!stack.isOf(ModItems.BOOMBOX)){
 			return;
 		}
@@ -49,16 +49,16 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 		BoomboxComponentDataType data = stack.get(ModComponents.BOOMBOX_COMPONENT);
 		String musicUUID = data.musicUUID();
 
-		if (this.getWorld().isClient) {
+		if (this.getEntityWorld().isClient()) {
 			this.swingHand(Hand.MAIN_HAND);
 			return;
 		}
 
-		BoomBoxEntity boomBoxEntity = new BoomBoxEntity(this.getWorld(), this.getPos(), UUID.fromString(musicUUID), data.volume());
+		BoomBoxEntity boomBoxEntity = new BoomBoxEntity(this.getEntityWorld(), this.getEntityPos(), UUID.fromString(musicUUID), data.volume());
 		stack.set(ModComponents.BOOMBOX_COMPONENT, null);
 		stack.decrement(1);
 		boomBoxEntity.setYaw(this.getYaw());
-		this.getWorld().spawnEntity(boomBoxEntity);
+		this.getEntityWorld().spawnEntity(boomBoxEntity);
 		cir.cancel();
 	}
 }

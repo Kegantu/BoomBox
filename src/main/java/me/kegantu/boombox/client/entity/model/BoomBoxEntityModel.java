@@ -26,7 +26,7 @@ public class BoomBoxEntityModel extends EntityModel<BoomBoxEntityRenderState> {
 		.uv(8, 10).cuboid(-5.0F, -4.0F, -1.5F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F))
 		.uv(0, 14).cuboid(-4.0F, -7.0F, 0.0F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F))
 		.uv(0, 8).cuboid(-3.0F, -7.0F, 0.0F, 6.0F, 1.0F, 1.0F, new Dilation(0.0F))
-		.uv(4, 14).cuboid(3.0F, -7.0F, 0.0F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 24.0F, 0.0F));
+		.uv(4, 14).cuboid(3.0F, -7.0F, 0.0F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 24.0F, 0.0F));
 		return TexturedModelData.of(modelData, 32, 32);
 	}
 }

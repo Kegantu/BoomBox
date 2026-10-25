@@ -4,7 +4,6 @@ import me.kegantu.boombox.BoomBox;
 import net.fabricmc.fabric.api.client.model.loading.v1.FabricBakedModelManager;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.render.model.ModelBaker;
-import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 import org.spongepowered.asm.mixin.Mixin;

@@ -42,11 +42,11 @@ public class ModPackets {
         ServerPlayNetworking.registerGlobalReceiver(BoomboxPlayC2SPayload.ID, (payload, context) -> {
             String url = payload.url();
             float volume = payload.volume();
-            Vector3f soundPos = payload.position();
+            Vector3f soundPos = new Vector3f(payload.position());
             String musicUUID = payload.musicUUID();
             int entityId = payload.entityID();
 
-            BoomBoxEntity entity = (BoomBoxEntity) context.player().getWorld().getEntityById(entityId);
+            BoomBoxEntity entity = (BoomBoxEntity) context.player().getEntityWorld().getEntityById(entityId);
             entity.setMusicUUID(UUID.fromString(musicUUID));
             BoomboxPlayS2CPayload payloadClient = new BoomboxPlayS2CPayload(url, volume, soundPos, musicUUID, payload.musicOwnerUUID());
 
@@ -83,7 +83,7 @@ public class ModPackets {
 
             UpdateVolumeS2CPayload payloadClient = new UpdateVolumeS2CPayload(volume, payload.musicUUID());
 
-            BoomBoxEntity entity = (BoomBoxEntity) context.player().getWorld().getEntityById(entityId);
+            BoomBoxEntity entity = (BoomBoxEntity) context.player().getEntityWorld().getEntityById(entityId);
             entity.setVolumeServer(volume);
             for (ServerPlayerEntity playerEntity : context.server().getPlayerManager().getPlayerList()){
                 ServerPlayNetworking.send(playerEntity, payloadClient);
@@ -130,7 +130,8 @@ public class ModPackets {
         });
 
         ClientPlayNetworking.registerGlobalReceiver(SoundPositionUpdateS2CPayload.ID, (payload, context) -> {
-            Vector3f position = payload.position();
+            Vector3f position = new Vector3f(payload.position());
+            BoomBox.LOGGER.info(position.toString());
             String musicUUID = payload.musicUUID();
 
             if (MusicManager.getSound(musicUUID) == null){
@@ -148,7 +149,13 @@ public class ModPackets {
             float playback = payload.playback();
 
             CompletableFuture<Path> futureFfmpeg = CompletableFuture.supplyAsync(() -> AudioDownloader.download(youtubeLink, uuid));
-            futureFfmpeg.thenAccept(path -> playMusic(path, volume, position, UUID.fromString(uuid), playback));
+            futureFfmpeg.whenComplete((path, exception) -> {
+                BoomBox.LOGGER.info(exception != null ? exception.toString() : "ok");
+                playMusic(path, volume, position, UUID.fromString(uuid), playback);
+                if (context.player().squaredDistanceTo(position) <= 32 * 32){
+                    context.client().getToastManager().add(new NotificationToast(YoutubeUtils.getTitle(youtubeLink)));
+                }
+            });
         });
 
         ClientPlayNetworking.registerGlobalReceiver(UpdateVolumeS2CPayload.ID, (payload, context) -> {

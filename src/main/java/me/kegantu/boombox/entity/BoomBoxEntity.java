@@ -1,5 +1,6 @@
 package me.kegantu.boombox.entity;
 
+import me.kegantu.boombox.BoomBox;
 import me.kegantu.boombox.client.screen.BoomboxScreen;
 import me.kegantu.boombox.init.*;
 import me.kegantu.boombox.item.components.BoomboxComponentDataType;
@@ -26,6 +27,8 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.Stats;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -38,7 +41,7 @@ import java.util.UUID;
 
 public class BoomBoxEntity extends Entity {
 
-    private static final TrackedData<Optional<UUID>> MUSIC_UUID = DataTracker.registerData(BoomBoxEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
+    private static final TrackedData<Optional<Text>> MUSIC_UUID = DataTracker.registerData(BoomBoxEntity.class, TrackedDataHandlerRegistry.OPTIONAL_TEXT_COMPONENT);
     private static final TrackedData<Float> VOLUME = DataTracker.registerData(BoomBoxEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static Sound MUSIC;
     private int timePassed;
@@ -50,28 +53,28 @@ public class BoomBoxEntity extends Entity {
     public BoomBoxEntity(World world, Vec3d position) {
         super(ModEntities.BOOMBOX_ENTITY, world);
         this.setPosition(position);
-        this.prevX = position.x;
-        this.prevY = position.y;
-        this.prevZ = position.z;
+        this.lastX = position.x;
+        this.lastY = position.y;
+        this.lastZ = position.z;
     }
 
     public BoomBoxEntity(World world, Vec3d position, UUID musicUUID) {
         super(ModEntities.BOOMBOX_ENTITY, world);
         this.setPosition(position);
-        this.prevX = position.x;
-        this.prevY = position.y;
-        this.prevZ = position.z;
-        this.dataTracker.set(MUSIC_UUID, Optional.of(musicUUID));
+        this.lastX = position.x;
+        this.lastY = position.y;
+        this.lastZ = position.z;
+        this.dataTracker.set(MUSIC_UUID, Optional.of(Text.of(musicUUID)));
         this.dataTracker.set(VOLUME, 1f);
     }
 
     public BoomBoxEntity(World world, Vec3d position, UUID musicUUID, float volume) {
         super(ModEntities.BOOMBOX_ENTITY, world);
         this.setPosition(position);
-        this.prevX = position.x;
-        this.prevY = position.y;
-        this.prevZ = position.z;
-        this.dataTracker.set(MUSIC_UUID, Optional.of(musicUUID));
+        this.lastX = position.x;
+        this.lastY = position.y;
+        this.lastZ = position.z;
+        this.dataTracker.set(MUSIC_UUID, Optional.of(Text.of(musicUUID)));
         this.dataTracker.set(VOLUME, volume);
     }
 
@@ -82,13 +85,13 @@ public class BoomBoxEntity extends Entity {
     }
 
     @Override
-    protected void readCustomDataFromNbt(NbtCompound nbt) {
-        this.dataTracker.set(VOLUME, nbt.getFloat("Volume"));
+    protected void readCustomData(ReadView view) {
+        this.dataTracker.set(VOLUME, view.getFloat("Volume", 1f));
     }
 
     @Override
-    protected void writeCustomDataToNbt(NbtCompound nbt) {
-        nbt.putFloat("Volume", this.dataTracker.get(VOLUME));
+    protected void writeCustomData(WriteView view) {
+        view.putFloat("Volume", this.dataTracker.get(VOLUME));
     }
 
     @Override
@@ -96,9 +99,9 @@ public class BoomBoxEntity extends Entity {
         super.tick();
         this.timePassed++;
 
-        this.prevX = this.getX();
-        this.prevY = this.getY();
-        this.prevZ = this.getZ();
+        this.lastX = this.getX();
+        this.lastY = this.getY();
+        this.lastZ = this.getZ();
         Vec3d vec3d = this.getVelocity();
         float f = this.getStandingEyeHeight() - 0.11111111F;
         if (this.isTouchingWater() && this.getFluidHeight(FluidTags.WATER) > f) {
@@ -109,10 +112,10 @@ public class BoomBoxEntity extends Entity {
             this.setVelocity(this.getVelocity().add(0.0, -0.04, 0.0));
         }
 
-        if (this.getWorld().isClient) {
+        if (this.getEntityWorld().isClient()) {
             this.noClip = false;
         } else {
-            this.noClip = !this.getWorld().isSpaceEmpty(this, this.getBoundingBox().contract(1.0E-7));
+            this.noClip = !this.getEntityWorld().isSpaceEmpty(this, this.getBoundingBox().contract(1.0E-7));
             if (this.noClip) {
                 this.pushOutOfBlocks(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
             }
@@ -122,7 +125,7 @@ public class BoomBoxEntity extends Entity {
             this.move(MovementType.SELF, this.getVelocity());
             float g = 0.98F;
             if (this.isOnGround()) {
-                g = this.getWorld().getBlockState(this.getVelocityAffectingPos()).getBlock().getSlipperiness() * 0.98F;
+                g = this.getEntityWorld().getBlockState(this.getVelocityAffectingPos()).getBlock().getSlipperiness() * 0.98F;
             }
 
             this.setVelocity(this.getVelocity().multiply(g, 0.98, g));
@@ -135,7 +138,7 @@ public class BoomBoxEntity extends Entity {
         }
 
         this.velocityDirty = this.velocityDirty | this.updateWaterState();
-        if (!this.getWorld().isClient) {
+        if (!this.getEntityWorld().isClient()) {
             double d = this.getVelocity().subtract(vec3d).lengthSquared();
             if (d > 0.01) {
                 this.velocityDirty = true;
@@ -151,7 +154,7 @@ public class BoomBoxEntity extends Entity {
         }
 
         this.timePassed = 0;
-        if (this.getWorld() instanceof ServerWorld serverWorld){
+        if (this.getEntityWorld() instanceof ServerWorld serverWorld){
             serverWorld.spawnParticles(ModParticles.BOOMBOX_NOTE, this.getX(), this.getY() + 0.25f, this.getZ(), 1, 0f,0f,0f, 0f);
         }
     }
@@ -173,21 +176,21 @@ public class BoomBoxEntity extends Entity {
 
     @Override
     public ActionResult interact(PlayerEntity player, Hand hand) {
-        if (this.getWorld().isClient()){
+        if (this.getEntityWorld().isClient()){
             if (player.isSneaking()){
                 MinecraftClient.getInstance().setScreen(new BoomboxScreen(Text.literal("Boombox Screen"), this));
                 return ActionResult.SUCCESS;
             }
         }
 
-        if (!this.getWorld().isClient()) {
+        if (!this.getEntityWorld().isClient()) {
             if (!player.isSneaking()){
                 if (this.dataTracker.get(MUSIC_UUID).isPresent() && !this.isPlaying()){
                     return ActionResult.PASS;
                 }
                 ItemStack itemStack = new ItemStack(ModItems.BOOMBOX);
                 if (this.dataTracker.get(MUSIC_UUID).isPresent()){
-                    itemStack.set(ModComponents.BOOMBOX_COMPONENT, new BoomboxComponentDataType(this.dataTracker.get(MUSIC_UUID).get().toString(), this.dataTracker.get(VOLUME)));
+                    itemStack.set(ModComponents.BOOMBOX_COMPONENT, new BoomboxComponentDataType(this.dataTracker.get(MUSIC_UUID).get().getLiteralString(), this.dataTracker.get(VOLUME)));
                 }
                 Item item = itemStack.getItem();
                 int i = itemStack.getCount();
@@ -205,7 +208,7 @@ public class BoomBoxEntity extends Entity {
 
                 player.increaseStat(Stats.PICKED_UP.getOrCreateStat(item), i);
                 if (MUSIC != null){
-                    MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString());
+                    MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().getLiteralString());
                     MusicManager.remove(MUSIC);
                 }
                 this.discard();
@@ -224,12 +227,12 @@ public class BoomBoxEntity extends Entity {
     public void downloadMusic(String youtubeLink, double volume, UUID musicOwner){
 
         if (this.dataTracker.get(MUSIC_UUID).isPresent()){
-            BoomboxStopC2SPayload payload = new BoomboxStopC2SPayload(this.dataTracker.get(MUSIC_UUID).get().toString());
+            BoomboxStopC2SPayload payload = new BoomboxStopC2SPayload(this.dataTracker.get(MUSIC_UUID).get().getLiteralString());
             ClientPlayNetworking.send(payload);
 
-            if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()) == null){
-                MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()).stop();
-                MusicManager.remove(this.dataTracker.get(MUSIC_UUID).get().toString());
+            if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().getLiteralString()) == null){
+                MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().getLiteralString()).stop();
+                MusicManager.remove(this.dataTracker.get(MUSIC_UUID).get().getLiteralString());
             }
         }
 
@@ -240,7 +243,7 @@ public class BoomBoxEntity extends Entity {
     }
 
     public void setMusicUUID(UUID uuid){
-        this.dataTracker.set(MUSIC_UUID, Optional.of(uuid));
+        this.dataTracker.set(MUSIC_UUID, Optional.of(Text.of(uuid)));
     }
 
     public void setVolumeClient(float volume){
@@ -250,11 +253,11 @@ public class BoomBoxEntity extends Entity {
             return;
         }
 
-        if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()) == null){
+        if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().getLiteralString()) == null){
             return;
         }
 
-        UpdateVolumeC2SPayload payload = new UpdateVolumeC2SPayload(volume, this.getId(), this.dataTracker.get(MUSIC_UUID).get().toString());
+        UpdateVolumeC2SPayload payload = new UpdateVolumeC2SPayload(volume, this.getId(), this.dataTracker.get(MUSIC_UUID).get().getLiteralString());
         ClientPlayNetworking.send(payload);
     }
 
@@ -271,10 +274,10 @@ public class BoomBoxEntity extends Entity {
             return false;
         }
 
-        if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()) == null){
+        if (MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().getLiteralString()) == null){
             return false;
         }
 
-        return MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().toString()).isPlaying();
+        return MusicManager.getSound(this.dataTracker.get(MUSIC_UUID).get().getLiteralString()).isPlaying();
     }
 }

@@ -27,7 +27,7 @@ public abstract class PlayerManagerMixin {
 
     @Inject(method = "onPlayerConnect", at = @At("TAIL"))
     private void loadMusicOnJoin(ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci){
-        if (player.getWorld().isClient()){
+        if (player.getEntityWorld().isClient()){
             return;
         }
 

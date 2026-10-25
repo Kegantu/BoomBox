@@ -10,27 +10,24 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryWrapper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 import java.util.Optional;
 
 @Mixin(PlayerInventory.class)
 public abstract class PlayerInventoryMixin {
 
-    @WrapOperation(method = "readNbt", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;fromNbt(Lnet/minecraft/registry/RegistryWrapper$WrapperLookup;Lnet/minecraft/nbt/NbtElement;)Ljava/util/Optional;"))
-    private Optional<ItemStack> readNbt(RegistryWrapper.WrapperLookup registries, NbtElement nbt, Operation<Optional<ItemStack>> original){
-        Optional<ItemStack> stack = original.call(registries, nbt);
-
-        if (!stack.get().isOf(ModItems.BOOMBOX)){
-            return stack;
+    @ModifyArg(method = "readData", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;setStack(ILnet/minecraft/item/ItemStack;)V"))
+    private ItemStack readData(ItemStack x){
+        if (!x.isOf(ModItems.BOOMBOX)){
+            return x;
         }
 
-        ItemStack boomboxStack = stack.get();
-
-        if (boomboxStack.get(ModComponents.BOOMBOX_COMPONENT) == null){
-            return stack;
+        if (x.get(ModComponents.BOOMBOX_COMPONENT) == null){
+            return x;
         }
 
-        boomboxStack.set(ModComponents.BOOMBOX_COMPONENT, null);
-        return stack;
+        x.set(ModComponents.BOOMBOX_COMPONENT, null);
+        return x;
     }
 }

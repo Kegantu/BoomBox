@@ -40,15 +40,15 @@ public abstract class ItemEntityMixin extends Entity {
         BoomboxComponentDataType data = stack.get(ModComponents.BOOMBOX_COMPONENT);
         String musicUUID = data.musicUUID();
 
-        if (this.getWorld().isClient) {
+        if (this.getEntityWorld().isClient()) {
             return;
         }
 
-        BoomBoxEntity boomBoxEntity = new BoomBoxEntity(this.getWorld(), this.getPos(), UUID.fromString(musicUUID), data.volume());
+        BoomBoxEntity boomBoxEntity = new BoomBoxEntity(this.getEntityWorld(), this.getEntityPos(), UUID.fromString(musicUUID), data.volume());
         stack.set(ModComponents.BOOMBOX_COMPONENT, null);
         stack.decrement(1);
         //boomBoxEntity.setYaw(this.getYaw());
-        this.getWorld().spawnEntity(boomBoxEntity);
+        this.getEntityWorld().spawnEntity(boomBoxEntity);
         ci.cancel();
     }
 }

@@ -7,8 +7,9 @@ import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
-public record BoomboxPlayS2CPayload(String url, float volume, Vector3f position, String musicUUID, String musicOwnerUUID) implements CustomPayload {
+public record BoomboxPlayS2CPayload(String url, float volume, Vector3fc position, String musicUUID, String musicOwnerUUID) implements CustomPayload {
 
     public static final Identifier BOOMBOX_PLAY_S2C_ID = Identifier.of(BoomBox.MOD_ID, "boombox_play_client");
     public static final CustomPayload.Id<BoomboxPlayS2CPayload> ID = new CustomPayload.Id<>(BOOMBOX_PLAY_S2C_ID);

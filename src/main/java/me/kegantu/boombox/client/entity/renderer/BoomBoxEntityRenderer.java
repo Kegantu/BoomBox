@@ -5,13 +5,13 @@ import me.kegantu.boombox.client.BoomBoxClient;
 import me.kegantu.boombox.client.entity.model.BoomBoxEntityModel;
 import me.kegantu.boombox.client.entity.renderstate.BoomBoxEntityRenderState;
 import me.kegantu.boombox.entity.BoomBoxEntity;
-import net.minecraft.client.render.Frustum;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.*;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -33,14 +33,16 @@ public class BoomBoxEntityRenderer extends EntityRenderer<BoomBoxEntity, BoomBox
     }
 
     @Override
-    public void render(BoomBoxEntityRenderState state, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
-        super.render(state, matrices, vertexConsumers, light);
+    public void render(BoomBoxEntityRenderState renderState, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraState) {
+        super.render(renderState, matrices, queue, cameraState);
         matrices.push();
         matrices.scale(-1f,-1f,1f);
         matrices.translate(0f, -1.5f,0f);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(MathHelper.lerp(state.tickDelta, state.entity.prevYaw, state.yaw)));
-        this.model.setAngles(state);
-        this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(this.getTexture(state.entity))), light, OverlayTexture.DEFAULT_UV);
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(MathHelper.lerp(renderState.tickDelta, renderState.entity.lastYaw, renderState.yaw)));
+        this.model.setAngles(renderState);
+        queue.submitModel(this.model, renderState, matrices, this.model.getLayer(getTexture(renderState.entity)),
+                renderState.light, OverlayTexture.DEFAULT_UV, -1, null, renderState.outlineColor, null);
+        //this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(this.getTexture(state.entity))), light, OverlayTexture.DEFAULT_UV);
         matrices.pop();
     }
 

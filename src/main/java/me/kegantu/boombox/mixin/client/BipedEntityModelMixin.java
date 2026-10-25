@@ -1,6 +1,5 @@
 package me.kegantu.boombox.mixin.client;
 
-import me.kegantu.boombox.extensionAccessor.PlayerEntityRenderStateAccessor;
 import me.kegantu.boombox.init.ModComponents;
 import me.kegantu.boombox.init.ModItems;
 import net.minecraft.client.model.ModelPart;
@@ -28,12 +27,8 @@ public abstract class BipedEntityModelMixin <T extends BipedEntityRenderState> e
     }
 
     @Inject(method = "positionLeftArm", at = @At("HEAD"), cancellable = true)
-    private void positionLeftArm(T state, BipedEntityModel.ArmPose armPose, CallbackInfo ci){
-        if (!(state instanceof PlayerEntityRenderStateAccessor extension)){
-            return;
-        }
-
-        ItemStack itemStack = extension.getBoomboxItemStackLeftHand();
+    private void positionLeftArm(T state, CallbackInfo ci){
+        ItemStack itemStack = state.leftHandItem;
 
         if (!itemStack.isOf(ModItems.BOOMBOX)){
             return;
@@ -49,19 +44,15 @@ public abstract class BipedEntityModelMixin <T extends BipedEntityRenderState> e
 
         if(state.isInSneakingPose){
             this.leftArm.pitch -= 1.0F;
-            this.leftArm.pivotY = 5.2F;
+            this.leftArm.originY = 5.2F;
         }
 
         ci.cancel();
     }
 
     @Inject(method = "positionRightArm", at = @At("HEAD"), cancellable = true)
-    private void positionRightArm(T state, BipedEntityModel.ArmPose armPose, CallbackInfo ci){
-        if (!(state instanceof PlayerEntityRenderStateAccessor extension)){
-            return;
-        }
-
-        ItemStack itemStack = extension.getBoomboxItemStackRightHand();
+    private void positionRightArm(T state, CallbackInfo ci){
+        ItemStack itemStack = state.getMainHandItemStack();
 
         if (!itemStack.isOf(ModItems.BOOMBOX)){
             return;
@@ -77,7 +68,7 @@ public abstract class BipedEntityModelMixin <T extends BipedEntityRenderState> e
 
         if(state.isInSneakingPose){
             this.rightArm.pitch -= 1.0F;
-            this.rightArm.pivotY = 5.2F;
+            this.rightArm.originY = 5.2F;
         }
 
         ci.cancel();

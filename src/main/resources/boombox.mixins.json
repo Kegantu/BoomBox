@@ -13,8 +13,6 @@
 	"client": [
 		"client.BipedEntityModelMixin",
 		"client.PlayerHeldItemFeatureRendererMixin",
-		"client.PlayerEntityRenderStateExtensionMixin",
-		"client.PlayerEntityRendererMixin",
 		"client.MinecraftClientMixin",
 		"client.ToastManagerEntryMixin"
 	],

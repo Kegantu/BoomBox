@@ -12,6 +12,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.option.SimpleOption;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenTexts;
@@ -72,15 +73,14 @@ public class BoomboxScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.renderBackground(context, mouseX, mouseY, delta);
         super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
-    public boolean keyPressed(int i, int j, int k) {
-        if (i == GLFW.GLFW_KEY_ESCAPE)
+    public boolean keyPressed(KeyInput input) {
+        if (input.key() == GLFW.GLFW_KEY_ESCAPE)
             MinecraftClient.getInstance().setScreen(null);
-        return super.keyPressed(i, j, k);
+        return super.keyPressed(input);
     }
 
     private Text getPercentValueText(Text prefix, double value) {
