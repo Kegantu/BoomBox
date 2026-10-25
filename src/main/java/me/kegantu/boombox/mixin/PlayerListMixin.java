@@ -1,11 +1,8 @@
 package me.kegantu.boombox.mixin;
 
-import me.kegantu.boombox.init.ModPackets;
 import me.kegantu.boombox.networking.payloads.S2C.BoomboxOnJoinSyncS2CPayload;
 import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.ServerMusicManager;
-import me.kegantu.boombox.soundsystem.Sound;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.Connection;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,8 +15,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import oshi.util.tuples.Triplet;
 
+//A.K.A PlayerManager
 @Mixin(PlayerList.class)
-public abstract class PlayerManagerMixin {
+public abstract class PlayerListMixin {
 
     @Inject(method = "placeNewPlayer", at = @At("TAIL"))
     private void loadMusicOnJoin(Connection connection, ServerPlayer player, CommonListenerCookie clientData, CallbackInfo ci){

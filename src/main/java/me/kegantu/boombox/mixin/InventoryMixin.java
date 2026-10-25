@@ -1,7 +1,5 @@
 package me.kegantu.boombox.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import me.kegantu.boombox.init.ModComponents;
 import me.kegantu.boombox.init.ModItems;
 import net.minecraft.world.entity.player.Inventory;
@@ -10,10 +8,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import java.util.Optional;
-
+//A.K.A PlayerInventory
 @Mixin(Inventory.class)
-public abstract class PlayerInventoryMixin {
+public abstract class InventoryMixin {
 
     @ModifyArg(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;setItem(ILnet/minecraft/world/item/ItemStack;)V"))
     private ItemStack readData(ItemStack x){

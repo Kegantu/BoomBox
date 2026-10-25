@@ -5,15 +5,15 @@
 	"mixins": [
 		"ItemEntityMixin",
 		"MinecraftServerMixin",
-		"PlayerEntityMixin",
-		"PlayerInventoryMixin",
-		"PlayerManagerMixin",
-		"ScreenHandlerMixin"
+		"PlayerMixin",
+		"InventoryMixin",
+		"PlayerListMixin",
+		"AbstractContainerMenuMixin"
 	],
 	"client": [
-		"client.BipedEntityModelMixin",
-		"client.PlayerHeldItemFeatureRendererMixin",
-		"client.MinecraftClientMixin"
+		"client.HumanoidModelMixin",
+		"client.PlayerItemInHandLayerMixin",
+		"client.MinecraftMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -19,10 +19,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.UUID;
 
+//A.K.A PlayerEntity
 @Mixin(Player.class)
-public abstract class PlayerEntityMixin extends LivingEntity {
+public abstract class PlayerMixin extends LivingEntity {
 
-	protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, Level world) {
+	protected PlayerMixin(EntityType<? extends LivingEntity> entityType, Level world) {
 		super(entityType, world);
 	}
 

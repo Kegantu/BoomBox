@@ -21,11 +21,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+//A.K.A PlayerHeldItemFeatureRenderer
 @Mixin(PlayerItemInHandLayer.class)
-public abstract class PlayerHeldItemFeatureRendererMixin<S extends AvatarRenderState, M extends EntityModel<S> & ArmedModel & HeadedModel>
+public abstract class PlayerItemInHandLayerMixin<S extends AvatarRenderState, M extends EntityModel<S> & ArmedModel & HeadedModel>
         extends ItemInHandLayer<S, M> {
 
-    public PlayerHeldItemFeatureRendererMixin(RenderLayerParent<S, M> featureRendererContext) {
+    public PlayerItemInHandLayerMixin(RenderLayerParent<S, M> featureRendererContext) {
         super(featureRendererContext);
     }
 

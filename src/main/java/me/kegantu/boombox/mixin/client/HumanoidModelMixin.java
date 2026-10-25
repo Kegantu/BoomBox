@@ -16,8 +16,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+//A.K.A BipedEntityModel
 @Mixin(HumanoidModel.class)
-public abstract class BipedEntityModelMixin <T extends HumanoidRenderState> extends EntityModel<T> implements ArmedModel, HeadedModel {
+public abstract class HumanoidModelMixin<T extends HumanoidRenderState> extends EntityModel<T> implements ArmedModel, HeadedModel {
 
     @Shadow @Final public ModelPart rightArm;
 
@@ -25,7 +26,7 @@ public abstract class BipedEntityModelMixin <T extends HumanoidRenderState> exte
 
     @Shadow @Final public ModelPart leftArm;
 
-    protected BipedEntityModelMixin(ModelPart root) {
+    protected HumanoidModelMixin(ModelPart root) {
         super(root);
     }
 

@@ -4,13 +4,10 @@ import me.kegantu.boombox.soundsystem.MusicManager;
 import me.kegantu.boombox.soundsystem.Sound;
 import me.kegantu.boombox.utils.AudioDownloader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.server.IntegratedServer;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,8 +16,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
+//A.K.A MinecraftClient
 @Mixin(Minecraft.class)
-public abstract class MinecraftClientMixin {
+public abstract class MinecraftMixin {
 
     @Shadow @Nullable public LocalPlayer player;
 
